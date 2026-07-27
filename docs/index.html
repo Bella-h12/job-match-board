@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>job-match-board · 把一页 LinkedIn 岗位变成一张能用的求职看板</title>
+<meta name="description" content="Claude Code skill：输入简历和一个 LinkedIn 岗位页链接，抓取每个岗位的 JD 和公司资料，逐条对照你的经历，产出带匹配度、优势、短板和执行计划的 HTML 看板。">
+<meta property="og:title" content="job-match-board">
+<meta property="og:description" content="把一页 LinkedIn 岗位，变成一张对着你的简历算出来的求职看板。">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --paper:#F1EFE8;
+    --raise:#FBFAF6;
+    --sink:#E5E2D8;
+    --ink:#16191E;
+    --ink-2:#565C68;
+    --faint:#8B909C;
+    --rule:#D6D2C6;
+    --rule-2:#C2BDAE;
+    --navy:#1B3A63;
+    --go:#2E7D4F;
+    --wait:#A8791C;
+    --stop:#A8433C;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#12141A; --raise:#1A1D25; --sink:#22262F;
+      --ink:#E9E7E1; --ink-2:#9AA0AC; --faint:#6E7480;
+      --rule:#2B2F39; --rule-2:#3A3F4B;
+      --navy:#8FB2E0; --go:#7CC49A; --wait:#D8B36A; --stop:#D89088;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#12141A; --raise:#1A1D25; --sink:#22262F;
+    --ink:#E9E7E1; --ink-2:#9AA0AC; --faint:#6E7480;
+    --rule:#2B2F39; --rule-2:#3A3F4B;
+    --navy:#8FB2E0; --go:#7CC49A; --wait:#D8B36A; --stop:#D89088;
+  }
+  :root[data-theme="light"]{
+    --paper:#F1EFE8; --raise:#FBFAF6; --sink:#E5E2D8;
+    --ink:#16191E; --ink-2:#565C68; --faint:#8B909C;
+    --rule:#D6D2C6; --rule-2:#C2BDAE;
+    --navy:#1B3A63; --go:#2E7D4F; --wait:#A8791C; --stop:#A8433C;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .col{max-width:860px;margin:0 auto;padding:0 24px}
+  .wide{max-width:1000px}
+
+  /* ---------- hero ---------- */
+  header{padding:72px 0 0;border-bottom:1px solid var(--rule)}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.16em;
+    color:var(--navy);font-weight:600;margin:0 0 18px;
+  }
+  h1{
+    font-family:var(--mono);font-size:clamp(30px,5.6vw,46px);line-height:1.12;
+    margin:0 0 18px;font-weight:700;letter-spacing:-.02em;text-wrap:balance;
+  }
+  .lede{font-size:clamp(17px,2.3vw,19px);color:var(--ink-2);margin:0 0 8px;max-width:38em}
+  .lede b{color:var(--ink);font-weight:600}
+
+  .install{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    margin:30px 0 0;
+  }
+  .cmd{
+    font-family:var(--mono);font-size:13px;background:var(--ink);color:var(--paper);
+    padding:11px 16px;border-radius:6px;overflow-x:auto;white-space:nowrap;max-width:100%;
+  }
+  .cmd .dim{color:var(--faint)}
+  .ghlink{
+    font-family:var(--mono);font-size:13px;font-weight:600;color:var(--navy);
+    text-decoration:none;border-bottom:1.5px solid currentColor;padding-bottom:1px;
+  }
+  .ghlink:hover{color:var(--ink)}
+  .ghlink:focus-visible{outline:2px solid var(--navy);outline-offset:3px;border-radius:2px}
+
+  /* ---------- thesis：首屏对照 ---------- */
+  .thesis{margin:56px 0 0;padding-bottom:64px}
+  .thesis h2{
+    font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--faint);
+    font-weight:600;margin:0 0 20px;
+  }
+  .panes{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);
+    border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+  @media(max-width:720px){.panes{grid-template-columns:1fr}}
+  .pane{background:var(--raise);padding:22px 24px 26px}
+  .pane h3{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;font-weight:700;
+    margin:0 0 4px;
+  }
+  .pane.before h3{color:var(--stop)}
+  .pane.after h3{color:var(--go)}
+  .pane .sub{font-size:12.5px;color:var(--faint);margin:0 0 16px}
+  .rows{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+  .rows li{
+    display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:baseline;
+    padding:7px 0;border-bottom:1px dotted var(--rule);font-size:13.5px;
+  }
+  .rows li:last-child{border-bottom:none}
+  .rows .n{font-family:var(--mono);font-size:11.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+  .rows .what{min-width:0}
+  .rows .what b{font-weight:600;display:block}
+  .rows .what span{color:var(--faint);font-size:12px}
+  .rows .tag{
+    font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.02em;
+    padding:1px 7px;border-radius:5px;white-space:nowrap;
+  }
+  .tag.junk{color:var(--stop);background:color-mix(in srgb,var(--stop) 13%,transparent)}
+  .tag.go{color:var(--go);background:color-mix(in srgb,var(--go) 14%,transparent)}
+  .tag.wait{color:var(--wait);background:color-mix(in srgb,var(--wait) 16%,transparent)}
+  .pane.before .what b{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--stop) 55%,transparent)}
+  .pane.before li:nth-child(3) .what b,
+  .pane.before li:nth-child(4) .what b{text-decoration:none}
+  .verdict-line{
+    margin:18px 0 0;padding:12px 14px;background:var(--sink);border-radius:7px;
+    font-size:13px;line-height:1.6;
+  }
+  .verdict-line b{color:var(--navy)}
+
+  /* ---------- 通用小节 ---------- */
+  section{padding:64px 0;border-bottom:1px solid var(--rule)}
+  section:last-of-type{border-bottom:none}
+  h2.sec{
+    font-size:24px;margin:0 0 10px;font-weight:700;letter-spacing:-.01em;text-wrap:balance;
+  }
+  .sec-note{color:var(--ink-2);margin:0 0 32px;max-width:44em;font-size:15.5px}
+
+  figure{margin:0 0 40px}
+  figure img{
+    display:block;width:100%;height:auto;border:1px solid var(--rule);
+    border-radius:9px;background:var(--raise);
+  }
+  figcaption{
+    margin:12px 2px 0;font-size:13.5px;color:var(--ink-2);line-height:1.65;
+  }
+  figcaption b{color:var(--ink);font-weight:600}
+
+  .steps{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:14px}
+  .steps li{
+    counter-increment:s;position:relative;padding:16px 20px 16px 58px;
+    background:var(--raise);border:1px solid var(--rule);border-radius:8px;font-size:14.5px;
+  }
+  .steps li::before{
+    content:counter(s);position:absolute;left:18px;top:16px;
+    width:26px;height:26px;border-radius:6px;background:var(--navy);color:var(--paper);
+    font-family:var(--mono);font-weight:700;font-size:12.5px;
+    display:grid;place-items:center;
+  }
+  .steps li b{font-weight:600}
+  .steps li code{font-family:var(--mono);font-size:12.5px;background:var(--sink);padding:1px 5px;border-radius:4px}
+
+  .opinions{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+  .op{background:var(--raise);padding:18px 22px}
+  .op h3{font-size:15.5px;margin:0 0 5px;font-weight:700}
+  .op p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.65}
+
+  .askbox{
+    background:var(--raise);border:1px solid var(--rule);border-radius:9px;
+    padding:20px 24px;font-family:var(--mono);font-size:13px;line-height:1.85;
+    overflow-x:auto;
+  }
+  .askbox .you{color:var(--navy);font-weight:700}
+  .askbox .path{color:var(--ink-2)}
+
+  footer{padding:44px 0 72px;color:var(--faint);font-size:13px;font-family:var(--mono);line-height:1.9}
+  footer a{color:var(--ink-2)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="col">
+    <p class="eyebrow">CLAUDE CODE SKILL</p>
+    <h1>job-match-board</h1>
+    <p class="lede">
+      把一页 LinkedIn 岗位列表，变成一张<b>对着你的简历</b>算出来的求职看板。
+      给它简历和一个链接，它去把每个岗位的 JD 和公司资料真的抓下来，逐条对照你的经历，
+      判出匹配度、投中概率、你的优势、你的短板，以及今天该做什么。
+    </p>
+    <div class="install">
+      <code class="cmd">git clone https://github.com/USERNAME/job-match-board.git <span class="dim">~/.claude/skills/job-match-board</span></code>
+      <a class="ghlink" href="https://github.com/USERNAME/job-match-board">在 GitHub 上看 ↗</a>
+    </div>
+
+    <div class="thesis">
+      <h2>它到底改变了什么</h2>
+      <div class="panes">
+        <div class="pane before">
+          <h3>LINKEDIN 给你的顺序</h3>
+          <p class="sub">按竞价排的，不是按适合你排的</p>
+          <ul class="rows">
+            <li><span class="n">01</span><span class="what"><b>Junior Data Analyst</b><span>Kestrel Staffing · 12 个月合同</span></span><span class="tag junk">猎头外包</span></li>
+            <li><span class="n">02</span><span class="what"><b>Staff Research Scientist</b><span>Meridian AI · 要博士 + 一作论文</span></span><span class="tag junk">方向不对</span></li>
+            <li><span class="n">03</span><span class="what"><b>Product Analyst</b><span>Vantage Analytics · 挂满一个月</span></span><span class="tag junk">1,200 人已投</span></li>
+            <li><span class="n">04</span><span class="what"><b>Implementation Lead</b><span>Alder Cloud · 全远程 · 3 天前</span></span><span class="tag go">真正该投的</span></li>
+          </ul>
+          <p class="verdict-line">前三个都不该投，真正该投的排在你已经划走的位置。</p>
+        </div>
+        <div class="pane after">
+          <h3>它给你的顺序</h3>
+          <p class="sub">按简历对得上什么 × 值不值得排</p>
+          <ul class="rows">
+            <li><span class="n">01</span><span class="what"><b>Solutions Engineer</b><span>Northwind Labs · 91 分 · 今天确认在招</span></span><span class="tag go">今天投</span></li>
+            <li><span class="n">02</span><span class="what"><b>Implementation Lead</b><span>Alder Cloud · 88 分 · 2 位校友在职</span></span><span class="tag go">今天投</span></li>
+            <li><span class="n">03</span><span class="what"><b>Product Analyst</b><span>Vantage Analytics · 66 分</span></span><span class="tag wait">仅内推时投</span></li>
+            <li><span class="n">04</span><span class="what"><b>Junior Data Analyst</b><span>Kestrel Staffing · 25 分</span></span><span class="tag junk">跳过</span></li>
+          </ul>
+          <p class="verdict-line"><b>排第一的是你上周就该投、今天确认还开着的那个。</b>不是新岗。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="col">
+    <h2 class="sec">它每天先告诉你的，不是"有什么新岗"</h2>
+    <p class="sec-note">
+      投简历最费时间的不是写简历，是判断该投哪个。一页十几个岗位，人工开 JD、查公司、对简历要两小时，
+      第二天全忘了——于是每天重读同样的岗位，真正该投的那个一直躺在待办里。
+      这个 skill 每天做的第一件事是复查旧待办还开不开着，然后才看新岗。
+    </p>
+    <figure>
+      <img src="01-conclusion.png" alt="核心结论段落，指出两个上周就该投的岗位今天确认仍在招；下方三栏列出今日新增、已确认还在招、从清单里划掉的岗位" loading="lazy">
+      <figcaption><b>核心结论 + 今日变化三栏。</b>结论先行：先说今天投什么、按什么顺序，理由放后面。三栏分别是新增了什么、哪些确认还在招、哪些划掉了——跨天状态一眼看完。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="col wide">
+    <h2 class="sec">产出长什么样</h2>
+    <p class="sec-note">下面全部来自仓库里的示例数据，<b>人物、公司、数字都是虚构的</b>。</p>
+
+    <figure>
+      <img src="02-ranking.png" alt="岗位排序表，每行有投中概率和对你的价值两列五点评分，以及该做什么" loading="lazy">
+      <figcaption><b>排序表：两个维度分开打分。</b>投中概率和"对你的价值"是两件事。一个岗可能很好投但对你没用，也可能极有价值但基本没戏——合成一个分数就看不见这个区别。</figcaption>
+    </figure>
+
+    <figure>
+      <img src="03-deepdive.png" alt="重点岗位深挖卡片，左侧绿色是你的优势，右侧红色是你的短板，底部是判断和具体动作" loading="lazy">
+      <figcaption><b>重点岗位：优势 / 短板双栏对照。</b>优势那栏必须逐条引用简历里<b>能举证</b>的经历，对上 JD 的具体某一条；短板那栏必须区分明写的硬门槛和加分项，是硬门槛就说是硬门槛，不安慰。最后一句永远是一个具体动作，不是"优化简历"。</figcaption>
+    </figure>
+
+    <figure>
+      <img src="04-board.png" alt="全部岗位总表，按 S / A / 中介 / 外包分档，每张卡片有匹配度分数、公司质量色灯、在招状态和三栏结论" loading="lazy">
+      <figcaption><b>全部岗位总表：可筛选，匹配度和公司质量分开标。</b>分数只说岗位本身贴不贴你，公司好不好由色灯单独表示——混在一起，猎头发的完美 JD 会被顶到第一名。状态标记逼你诚实：只有当天真的开过页面确认的才能标"在招"。中介发布的岗位单独归一档，因为对它们该做的动作不是投递，是先问出真实雇主是谁。</figcaption>
+    </figure>
+
+    <figure>
+      <img src="05-steps.png" alt="执行计划，按天排的具体动作，最后一条是明确不做的事" loading="lazy">
+      <figcaption><b>执行计划：按天排的具体动作，包括明确不做的事。</b>最后一条永远是"今天不做什么、省下的时间给谁"——没有这条，清单只会越滚越长。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <h2 class="sec">怎么用</h2>
+    <p class="sec-note">装好之后在 Claude Code 里直接说话，或者用 <code style="font-family:var(--mono);font-size:14px">/job-match-board</code> 触发。</p>
+
+    <div class="askbox">
+      <span class="you">帮我分析这页岗位</span><br>
+      简历在 <span class="path">~/Documents/resume.pdf</span><br>
+      https://www.linkedin.com/jobs/search-results/?currentJobId=…
+    </div>
+
+    <ol class="steps" style="margin-top:26px">
+      <li><b>两个必需输入：简历 + 岗位页链接。</b>缺简历它会明说「只能列岗位、判不了匹配」，让你选补简历还是接受降级版本——不会假装分析过。</li>
+      <li><b>第一次跑会问三件事</b>，问完存进 <code>profile.json</code> 复用：薪酬底线（没有底线就判不了"擦线"还是"远超"）、地点与远程偏好、在找什么方向（决定哪些岗直接进不投清单）。</li>
+      <li><b>它从 URL 里抠 Job ID。</b>这类个性化推荐页用关键词搜索复现不了，URL 里的 <code>currentJobId</code> 和 <code>originToLandingJobPostings</code> 是唯一可靠的锚点，一个不落全抓。</li>
+      <li><b>抓的是真数据</b>：JD 全文、公司规模、员工增速、中位任期、申请人数、申请人资历分布、有没有校友或前同事在职。</li>
+      <li><b>之后每天只丢一个新链接。</b>已分析过的岗位不重写，只标状态变化；发布到同一个固定链接，你的书签不用换。</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <h2 class="sec">分析和出页面是分开的</h2>
+    <p class="sec-note">
+      分析产出一个 <code style="font-family:var(--mono);font-size:14px">board.json</code>，构建脚本负责把它变成 HTML。
+      所以你也可以手写 JSON 直接拿它当静态页生成器用，不经过 Claude。
+    </p>
+    <div class="askbox">
+      python3 scripts/build_board.py examples/board.example.json /tmp/demo.html<br>
+      python3 scripts/test_build.py
+    </div>
+    <p class="sec-note" style="margin-top:24px">
+      构建脚本先校验再渲染，出错带位置：<br>
+      <code style="font-family:var(--mono);font-size:13px;color:var(--stop)">构建失败：$.board[2].light = 'blue'，只能是 ['green', 'red', 'yellow'] 之一</code><br>
+      16 条回归用例里有 11 条是反例——断言"这种输入必须报错"。每一条都撤掉对应的校验确认过它会变红：
+      只能变绿的测试教人忽略红色。
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <h2 class="sec">几条设计上的固执</h2>
+    <p class="sec-note">这些不是配置项，是这个工具的立场。</p>
+    <div class="opinions">
+      <div class="op">
+        <h3>匹配度和公司质量分开算</h3>
+        <p>混在一起，竞价买来的排序会伪装成好机会。猎头能写出一份完美贴合你的 JD，那不代表那份工作存在。</p>
+      </div>
+      <div class="op">
+        <h3>短板必须诚实</h3>
+        <p>明写的 required 就说是硬门槛，不安慰。简历里没有的经历不替你吹出来——面试会当场穿帮，代价比少投一个岗大得多。</p>
+      </div>
+      <div class="op">
+        <h3>状态不许装作知道</h3>
+        <p>当天真的开过页面确认的才标"在招"，沿用旧数据的标"未再查"。一个已经招满的岗位挂在第一位，比没有这张表更糟。</p>
+      </div>
+      <div class="op">
+        <h3>说人话</h3>
+        <p>不用军事和游戏比喻（弹药、靶位、赛道、打法），不用行业黑话。"你的优势""你的短板""怎么切入"就够了。</p>
+      </div>
+      <div class="op">
+        <h3>每天先复查旧待办，再找新岗</h3>
+        <p>一个上周就该投、今天确认还开着的好岗位，比三个新岗更重要。清单越滚越长是求职里最常见的自我安慰。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="col">
+    MIT License · 需要 Python 3.9+，无第三方依赖<br>
+    数据通过 <a href="https://github.com/stickerdaniel/linkedin-mcp-server">LinkedIn MCP server</a> 用你自己的登录会话抓取<br>
+    <a href="https://github.com/USERNAME/job-match-board">github.com/USERNAME/job-match-board</a>
+  </div>
+</footer>
+
+</body>
+</html>
