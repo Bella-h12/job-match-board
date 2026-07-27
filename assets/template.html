@@ -1,0 +1,419 @@
+<title>{{TITLE}}</title>
+<style>
+  :root{
+    --bg:#F7F5F0;
+    --surface:#FFFFFF;
+    --surface-2:#F0EDE5;
+    --ink:#1C2230;
+    --ink-2:#5A6070;
+    --faint:#8B90A0;
+    --line:#E2DED4;
+    --line-strong:#CFCABC;
+    --accent:#14315C;
+    --gold:#A9782B;
+    --gold-soft:#F3EAD7;
+    --good:#2E7D4F;
+    --warn:#B07818;
+    --bad:#A8433C;
+    --good-bg:#E8F2EB;
+    --warn-bg:#F6EEDC;
+    --bad-bg:#F5E7E5;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#14161C; --surface:#1C1F27; --surface-2:#232732; --ink:#E8E6E0; --ink-2:#9BA0AD; --faint:#767B88;
+      --line:#31353F; --line-strong:#414653; --accent:#8FB0DE; --gold:#D3A959; --gold-soft:#2E2A1E;
+      --good:#7CC49A; --warn:#D8B36A; --bad:#D89088;
+      --good-bg:#1E2B23; --warn-bg:#2C2617; --bad-bg:#2E1F1D;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14161C; --surface:#1C1F27; --surface-2:#232732; --ink:#E8E6E0; --ink-2:#9BA0AD; --faint:#767B88;
+    --line:#31353F; --line-strong:#414653; --accent:#8FB0DE; --gold:#D3A959; --gold-soft:#2E2A1E;
+    --good:#7CC49A; --warn:#D8B36A; --bad:#D89088;
+    --good-bg:#1E2B23; --warn-bg:#2C2617; --bad-bg:#2E1F1D;
+  }
+  :root[data-theme="light"]{
+    --bg:#F7F5F0; --surface:#FFFFFF; --surface-2:#F0EDE5; --ink:#1C2230; --ink-2:#5A6070; --faint:#8B90A0;
+    --line:#E2DED4; --line-strong:#CFCABC; --accent:#14315C; --gold:#A9782B; --gold-soft:#F3EAD7;
+    --good:#2E7D4F; --warn:#B07818; --bad:#A8433C;
+    --good-bg:#E8F2EB; --warn-bg:#F6EEDC; --bad-bg:#F5E7E5;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+    line-height:1.75;
+    font-size:15.5px;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:48px 24px 80px}
+  .wrap.wide{max-width:1080px}
+
+  header.masthead{border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:28px}
+  .kicker{font-size:12px;letter-spacing:.18em;color:var(--gold);font-weight:600;margin-bottom:10px}
+  h1{font-size:30px;line-height:1.3;margin:0 0 8px;font-weight:700;text-wrap:balance}
+  .meta{color:var(--ink-2);font-size:13px}
+  .meta span+span::before{content:"·";margin:0 8px;color:var(--line-strong)}
+
+  .verdict{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:4px solid var(--gold);
+    border-radius:6px;
+    padding:20px 24px;
+    margin:0 0 32px;
+  }
+  .verdict .label{font-size:12px;letter-spacing:.14em;color:var(--gold);font-weight:600;margin-bottom:6px}
+  .verdict p{margin:0}
+  .verdict p+p{margin-top:12px}
+  .verdict strong{color:var(--accent)}
+
+  h2{
+    font-size:20px;margin:52px 0 6px;font-weight:700;
+    display:flex;align-items:baseline;gap:12px;
+  }
+  h2::after{content:"";flex:1;border-bottom:1px solid var(--line)}
+  .h2-note{color:var(--ink-2);font-size:13.5px;margin:0 0 18px}
+
+  .refresh{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:0 0 8px}
+  .rf{border-radius:6px;padding:14px 16px;border:1px solid var(--line);background:var(--surface)}
+  .rf h3{margin:0 0 9px;font-size:11.5px;font-family:var(--mono);letter-spacing:.1em;font-weight:700}
+  .rf.new h3{color:var(--good)} .rf.hold h3{color:var(--accent)} .rf.cut h3{color:var(--bad)}
+  .rf ul{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+  .rf li{font-size:13px;line-height:1.55}
+  .rf li b{font-weight:600}
+  .rf li span{color:var(--ink-2)}
+
+  .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:620px}
+  th{
+    text-align:left;font-size:12px;letter-spacing:.08em;color:var(--ink-2);
+    font-weight:600;padding:12px 16px;border-bottom:1px solid var(--line);
+    background:var(--surface-2);white-space:nowrap;
+  }
+  td{padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--mono);font-size:13px}
+  .ok{color:var(--good);font-weight:600}
+  .meh{color:var(--warn);font-weight:600}
+  .no{color:var(--bad);font-weight:600}
+
+  .rank-table td:first-child{font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;font-family:var(--mono)}
+  .rank-table .co{color:var(--ink-2);font-size:12.5px;display:block}
+  .dots{display:inline-flex;gap:3px;vertical-align:middle}
+  .dots i{width:9px;height:9px;border-radius:50%;background:var(--line-strong)}
+  .dots i.on{background:var(--accent)}
+  .dots.v i.on{background:var(--gold)}
+  .act{font-size:13px;font-weight:600;white-space:nowrap}
+  .act.go{color:var(--good)}
+  .act.ref{color:var(--warn)}
+  .act.skip{color:var(--ink-2);font-weight:400}
+
+  .job{background:var(--surface);border:1px solid var(--line);border-radius:8px;margin:20px 0;overflow:hidden}
+  .job.hot{border-color:var(--gold)}
+  .job-head{padding:18px 22px 14px;border-bottom:1px solid var(--line)}
+  .job-head .rank-chip{
+    display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.1em;
+    padding:2px 10px;border-radius:99px;margin-bottom:8px;margin-right:6px;
+    background:var(--gold-soft);color:var(--gold);
+  }
+  .job-head h3{margin:0;font-size:18px}
+  .job-head h3 small{font-size:13px;font-weight:600;color:var(--ink-2);margin-left:8px}
+  .job-head .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
+  .job-head .sub b{color:var(--good);font-weight:600}
+  .job-body{padding:16px 22px 20px}
+  .job-body p{margin:0 0 12px;font-size:14px}
+  .comp-line{font-size:13.5px;color:var(--ink-2);margin:0 0 12px;padding:8px 12px;background:var(--surface-2);border-radius:6px}
+  .comp-line b{color:var(--accent);font-variant-numeric:tabular-nums}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:640px){.cols{grid-template-columns:1fr}}
+  .col{border-radius:6px;padding:14px 16px;font-size:13.5px}
+  .col.ammo{background:var(--good-bg)}
+  .col.gap{background:var(--bad-bg)}
+  .col h4{margin:0 0 8px;font-size:12.5px;letter-spacing:.1em;font-weight:700}
+  .col.ammo h4{color:var(--good)}
+  .col.gap h4{color:var(--bad)}
+  .col ul{margin:0;padding-left:18px}
+  .col li{margin:5px 0;line-height:1.65}
+  .verd{margin:14px 0 0;padding:12px 16px;border-radius:6px;font-size:14px;background:var(--surface-2)}
+  .verd b:first-child{color:var(--accent)}
+
+  .board-legend{
+    background:var(--surface);border:1px solid var(--line);border-radius:6px;
+    padding:14px 18px;margin:0 0 4px;font-size:13px;
+    display:flex;gap:14px 26px;flex-wrap:wrap;align-items:center;
+  }
+  .legw{display:flex;align-items:center;gap:7px}
+  .legw b{font-weight:600}
+  .legw span{color:var(--ink-2)}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+
+  .controls{
+    position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 0 12px;margin-top:18px;
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line);
+  }
+  .filter{
+    font-family:var(--mono);font-size:12.5px;padding:6px 13px;border-radius:99px;
+    border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-2);cursor:pointer;
+    transition:background .15s,color .15s,border-color .15s;font-weight:600;
+  }
+  .filter:hover{color:var(--ink);border-color:var(--faint)}
+  .filter[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .filter:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .count-tag{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--faint)}
+
+  .tier{margin-top:30px}
+  .tier-head{display:flex;align-items:baseline;gap:13px;margin-bottom:2px}
+  .tier-badge{
+    font-family:var(--mono);font-weight:700;font-size:14px;min-width:36px;height:36px;padding:0 8px;
+    display:grid;place-items:center;border-radius:8px;flex:0 0 auto;color:var(--bg);
+  }
+  .tier-badge.s{background:var(--good)} .tier-badge.a{background:var(--accent)}
+  .tier-badge.broker{background:var(--gold)} .tier-badge.out{background:var(--faint)}
+  .tier-title{font-size:16.5px;font-weight:700}
+  .tier-sub{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .tier-desc{color:var(--ink-2);font-size:13px;margin:2px 0 14px;padding-left:49px}
+  @media(max-width:560px){.tier-desc{padding-left:0}}
+
+  .bjob{
+    background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:15px 18px;
+    margin-bottom:11px;border-left:3px solid var(--tc,var(--line-strong));
+  }
+  .bjob.s{--tc:var(--good)} .bjob.a{--tc:var(--accent)} .bjob.broker{--tc:var(--gold)} .bjob.out{--tc:var(--faint)}
+  .bjob-top{display:flex;gap:16px;align-items:flex-start}
+  .score{
+    font-family:var(--mono);font-weight:700;font-size:24px;line-height:1;
+    font-variant-numeric:tabular-nums;color:var(--tc);flex:0 0 auto;width:38px;text-align:right;
+  }
+  .score small{display:block;font-size:8.5px;letter-spacing:.04em;color:var(--faint);font-weight:600;margin-top:3px}
+  .bjob-main{flex:1;min-width:0}
+  .bjob-co{font-weight:700;font-size:15.5px}
+  .bjob-co a{color:inherit;text-decoration:none;border-bottom:1.5px solid var(--tc)}
+  .bjob-co a:hover{color:var(--tc)}
+  .prospect{
+    display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--mono);
+    font-weight:600;padding:1px 7px;border-radius:6px;vertical-align:middle;margin-left:4px;
+  }
+  .prospect.green{color:var(--good);background:color-mix(in srgb,var(--good) 15%,transparent)}
+  .prospect.yellow{color:var(--warn);background:color-mix(in srgb,var(--warn) 17%,transparent)}
+  .prospect.red{color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,transparent)}
+  .bjob-role{font-size:14px;margin-top:1px}
+  .bjob-team{color:var(--ink-2);font-size:12.5px;margin-top:5px;line-height:1.5}
+  .bjob-team b{color:var(--ink);font-weight:600}
+  .bjob-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .chip{
+    font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px;
+    background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);
+  }
+  .chip.lv{color:var(--ink);font-weight:600}
+  .chip.remote{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+  a.chip.open{
+    font-weight:700;text-decoration:none;color:var(--tc);
+    border-color:color-mix(in srgb,var(--tc) 45%,var(--line));background:color-mix(in srgb,var(--tc) 9%,transparent);
+  }
+  a.chip.open:hover{background:color-mix(in srgb,var(--tc) 18%,transparent)}
+  a.chip.open:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  a.chip.open.search{color:var(--ink-2);border-color:var(--line-strong);background:var(--surface-2)}
+  .chip.st-open{color:var(--good);border-color:color-mix(in srgb,var(--good) 42%,var(--line))}
+  .chip.st-verify{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 42%,var(--line))}
+  .chip.st-filled{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 42%,var(--line));text-decoration:line-through}
+  .chip.st-stale{color:var(--faint)}
+  .bjob-acts{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:13px;padding-top:13px;
+    border-top:1px dashed var(--line-strong);
+  }
+  @media(max-width:640px){.bjob-acts{grid-template-columns:1fr}}
+  .bact h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;margin:0 0 5px;font-weight:700}
+  .bact.gap h4{color:var(--bad)} .bact.fix h4{color:var(--accent)} .bact.hook h4{color:var(--good)}
+  .bact p{margin:0;font-size:12.8px;line-height:1.55}
+
+  .skip-list{background:var(--surface);border:1px solid var(--line);border-radius:8px;margin:20px 0}
+  .skip-item{padding:14px 22px;border-bottom:1px solid var(--line);font-size:14px}
+  .skip-item:last-child{border-bottom:none}
+  .skip-item b{display:block;margin-bottom:2px}
+  .skip-item span{color:var(--ink-2);font-size:13.5px}
+
+  .leads{background:var(--surface);border:1px dashed var(--line-strong);border-radius:8px;padding:16px 22px;margin:20px 0;font-size:14px}
+  .leads h4{margin:0 0 8px;font-size:13px;letter-spacing:.1em;color:var(--gold)}
+  .leads ul{margin:0;padding-left:18px}
+  .leads li{margin:5px 0}
+  .leads li span{color:var(--ink-2);font-size:13px}
+
+  .steps{margin:16px 0 0;padding:0;list-style:none;counter-reset:step}
+  .steps li{
+    counter-increment:step;position:relative;
+    padding:14px 20px 14px 58px;margin:10px 0;
+    background:var(--surface);border:1px solid var(--line);border-radius:6px;font-size:14px;
+  }
+  .steps li::before{
+    content:counter(step);
+    position:absolute;left:18px;top:14px;
+    width:26px;height:26px;border-radius:50%;
+    background:var(--accent);color:var(--bg);
+    font-weight:700;font-size:13px;font-family:var(--mono);
+    display:flex;align-items:center;justify-content:center;
+  }
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink-2);font-size:12.5px;line-height:1.7}
+  a{color:var(--accent)}
+  a.jd-link{color:inherit;text-decoration:none;border-bottom:1px dashed color-mix(in srgb,currentColor 45%,transparent)}
+  a.jd-link:hover{color:var(--accent);border-bottom:1px solid var(--accent)}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="kicker">{{KICKER}}</div>
+    <h1>{{HEADLINE}}</h1>
+    <div class="meta">{{META_ITEMS}}</div>
+  </header>
+
+  {{VERDICT}}
+
+<!--section:CHANGES-->
+  {{CHANGES}}
+<!--/section:CHANGES-->
+
+  <h2>本周可投全部岗位 · 排序</h2>
+  <p class="h2-note">{{RANKING_NOTE}}</p>
+  {{RANKING}}
+
+  <h2>{{DEEPDIVES_HEADING}}</h2>
+  <p class="h2-note">{{DEEPDIVES_NOTE}}</p>
+
+  {{DEEPDIVES}}
+</div>
+
+<div class="wrap wide">
+  <h2>{{BOARD_HEADING}}</h2>
+  <p class="h2-note">{{BOARD_NOTE}}</p>
+
+  <div class="board-legend" id="legend"></div>
+
+  <div class="controls" role="group" aria-label="按分档筛选">
+    {{FILTERS}}
+    <span class="count-tag" id="countTag"></span>
+  </div>
+
+  <main id="board"></main>
+
+<!--section:SALARY-->
+  <h2>薪酬估算</h2>
+  <p class="h2-note">{{SALARY_NOTE}}</p>
+  {{SALARY}}
+<!--/section:SALARY-->
+</div>
+
+<div class="wrap">
+<!--section:SKIPS-->
+  <h2>不投的岗位与原因</h2>
+  {{SKIPS}}
+<!--/section:SKIPS-->
+
+<!--section:LEADS-->
+  {{LEADS}}
+<!--/section:LEADS-->
+
+<!--section:STEPS-->
+  <h2>执行计划</h2>
+  {{STEPS}}
+<!--/section:STEPS-->
+
+  <footer>{{FOOTER}}</footer>
+</div>
+
+<script id="board-data" type="application/json">{{BOARD_DATA}}</script>
+<script>
+(function(){
+  const DATA = JSON.parse(document.getElementById('board-data').textContent);
+  const board = document.getElementById('board');
+  const legend = document.getElementById('legend');
+  const L = DATA.labels;
+
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  legend.innerHTML =
+    Object.entries(DATA.lights).map(function(pair){
+      const key = pair[0], label = pair[1];
+      const color = key === 'green' ? 'var(--good)' : key === 'yellow' ? 'var(--warn)' : 'var(--bad)';
+      return '<div class="legw"><span class="dot" style="background:' + color + '"></span><b>' +
+             esc(label) + '</b></div>';
+    }).join('') +
+    Object.entries(DATA.status).map(function(pair){
+      return '<div class="legw"><span class="chip ' + pair[1][0] + '">' + esc(pair[1][1]) + '</span></div>';
+    }).join('');
+
+  function render(filter){
+    board.innerHTML = '';
+    let shown = 0;
+    DATA.tierOrder.forEach(function(tk){
+      const list = DATA.jobs.filter(function(j){
+        return j.t === tk && (filter === 'all' || filter === tk);
+      });
+      if(!list.length) return;
+      const info = DATA.tiers[tk] || {t:tk, title:tk, sub:'', desc:''};
+      const sec = document.createElement('section');
+      sec.className = 'tier';
+      sec.innerHTML =
+        '<div class="tier-head"><div class="tier-badge ' + tk + '">' + esc(info.t || tk) + '</div>' +
+        '<div><span class="tier-title">' + esc(info.title || '') + '</span> &nbsp;' +
+        '<span class="tier-sub">' + esc(info.sub || '') + ' · ' + list.length + '岗</span></div></div>' +
+        '<p class="tier-desc">' + (info.desc || '') + '</p>';
+
+      list.forEach(function(j){
+        shown++;
+        const st = DATA.status[j.status] || ['st-stale','未再查'];
+        const link = DATA.urls[j.co];
+        const coHtml = link
+          ? '<a href="' + esc(link[0]) + '" target="_blank" rel="noopener">' + esc(j.co) + ' ↗</a>'
+          : esc(j.co);
+        const openChip = link
+          ? '<a class="chip open' + (link[1] ? '' : ' search') + '" href="' + esc(link[0]) +
+            '" target="_blank" rel="noopener">' + (link[1] ? '↗ 打开岗位' : '↗ 搜索该岗') + '</a>'
+          : '';
+        const el = document.createElement('article');
+        el.className = 'bjob ' + j.t;
+        el.innerHTML =
+          '<div class="bjob-top">' +
+            '<div class="score">' + esc(j.sc) + '<small>' + esc(L.score) + '</small></div>' +
+            '<div class="bjob-main">' +
+              '<span class="bjob-co">' + coHtml + '</span>' +
+              '<span class="prospect ' + esc(j.light) + '">' + esc(DATA.lights[j.light]) + '</span><br>' +
+              '<span class="bjob-role">' + esc(j.role) + '</span>' +
+              '<div class="bjob-team"><b>' + esc(j.channel) + '</b> · ' + esc(j.note) + '</div>' +
+              '<div class="bjob-chips">' + openChip +
+                '<span class="chip lv">' + esc(j.lv) + '</span>' +
+                '<span class="chip">' + esc(j.loc) + '</span>' +
+                (j.remote ? '<span class="chip remote">◉ 远程 / 混合</span>' : '') +
+                '<span class="chip ' + st[0] + '">' + esc(st[1]) + '</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="bjob-acts">' +
+            '<div class="bact gap"><h4>' + esc(L.gap) + '</h4><p>' + esc(j.gap) + '</p></div>' +
+            '<div class="bact fix"><h4>' + esc(L.fix) + '</h4><p>' + esc(j.fix) + '</p></div>' +
+            '<div class="bact hook"><h4>' + esc(L.hook) + '</h4><p>' + esc(j.hook) + '</p></div>' +
+          '</div>';
+        sec.appendChild(el);
+      });
+      board.appendChild(sec);
+    });
+    document.getElementById('countTag').textContent = '显示 ' + shown + ' / ' + DATA.jobs.length + ' 个岗位';
+  }
+
+  render('all');
+
+  document.querySelectorAll('.filter').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.filter').forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+      btn.setAttribute('aria-pressed','true');
+      render(btn.dataset.tier);
+    });
+  });
+})();
+</script>

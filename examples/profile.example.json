@@ -1,0 +1,67 @@
+{
+  "_comment": "第一次跑时问出来存下，之后每天复用。人物为虚构示例。",
+
+  "resume_path": "~/Documents/resume.pdf",
+
+  "salary_floor": {
+    "amount": 5000,
+    "currency": "EUR",
+    "period": "month",
+    "note": "低于这个数直接进不投清单；擦线的岗位在第一轮面试就压实区间"
+  },
+
+  "location": {
+    "base": "Berlin",
+    "willing_to_relocate": false,
+    "needs_visa_sponsorship": false,
+    "remote_preference": "远程优先，混合可接受，纯现场要看通勤"
+  },
+
+  "direction": {
+    "target_tracks": ["Solutions / Forward Deployed", "Product", "Data Platform"],
+    "avoid_tracks": ["Research Scientist（要博士）", "纯 MLOps / Data Engineer", "销售序列"],
+    "why": "下一步想做面向客户的技术交付，不想回到纯后台分析"
+  },
+
+  "blocklist": {
+    "companies": ["某某人力"],
+    "rules": [
+      "招聘中介 / 派遣公司发布的岗位归到中介档，先问出真实雇主再判断",
+      "12 个月以下的合同工岗位不投",
+      "初级岗（0-2 年）不投，会把定位搞模糊"
+    ]
+  },
+
+  "evidence": {
+    "_comment": "从简历里提炼一次，之后写「优势」栏时直接引用，不要每天重新发挥",
+    "projects": [
+      "从零交付过一套客户侧数据管道：接入 → 建模 → 自动报表，上线后每周省掉约 12 小时人工",
+      "独立做过一个上线产品，含支付闭环和自动开通流程"
+    ],
+    "hard_skills": ["Python", "SQL（窗口函数 / 查询优化）", "REST API 集成", "Docker"],
+    "domain": ["B2B SaaS", "电商履约"],
+    "paper_facts": {
+      "years_experience": 2.5,
+      "highest_degree": "Master",
+      "current_title": "Data Analyst",
+      "_note": "年限用当天日期在代码里算，不要让模型心算"
+    },
+    "known_gaps": [
+      "没有大规模数据迁移经验",
+      "没带过人",
+      "金融行业域知识空白"
+    ]
+  },
+
+  "network": {
+    "_comment": "只记内推通道的存在与关系强度，具体人名和聊天内容不要写进会公开的文件",
+    "alumni_of": ["某某大学"],
+    "past_employers": ["某某公司"]
+  },
+
+  "output": {
+    "artifact_url": "https://claude.ai/code/artifact/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "language": "zh",
+    "note": "每天更新同一个 artifact URL，书签保持不变"
+  }
+}

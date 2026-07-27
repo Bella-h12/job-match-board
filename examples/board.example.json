@@ -1,0 +1,252 @@
+{
+  "_comment": "示例数据，人物与公司均为虚构。跑 python3 scripts/build_board.py examples/board.example.json /tmp/demo.html 可以看到成品。",
+
+  "meta": {
+    "title": "柏林求职看板",
+    "kicker": "求职情报 · 柏林 · 每日岗位 + 公司总表",
+    "headline": "3-14：两个远程岗今天确认还在招，本周只投这两个",
+    "meta_items": ["数据源 LinkedIn 实时抓取", "2026-03-14", "薪酬为市场估算"]
+  },
+
+  "verdict": [
+    "今天页面上真正值得动的是 <strong>Northwind Labs 的 Solutions Engineer</strong>——JD 把你日常用的那套工具逐条点名，而且是全远程、欧元计价。今天就投。",
+    "<strong>Vantage Analytics 的 Product Analyst</strong> 内容对口但已经挂了一个月、申请人数破千，冷投等于陪跑，只在能拿到内推时才碰。剩下一个是资深算法岗，方向不对，跳过。"
+  ],
+
+  "changes": {
+    "new": [
+      { "name": "Northwind Labs", "note": "— Solutions Engineer，全远程、欧元计价。值得投" },
+      { "name": "Vantage Analytics", "note": "— Product Analyst，内容对口但 1,200 人已投。仅内推时投" }
+    ],
+    "confirmed": [
+      { "name": "Harbor Systems", "note": "— Forward Deployed Engineer，重发一周，仍在招" }
+    ],
+    "dropped": [
+      { "name": "Meridian AI", "note": "— Staff Research Scientist，要博士学位，方向不对" }
+    ]
+  },
+
+  "ranking_note": "只列现在能投的活岗。投中概率 = 简历对 JD 明写门槛的符合度 × 申请人数和竞争程度；对你的价值 = 对下一步职业方向的长期积累。",
+  "ranking": [
+    {
+      "rank": 1,
+      "title": "Solutions Engineer",
+      "url": "https://www.linkedin.com/jobs/view/1111111111/",
+      "context": "Northwind Labs · 全远程 · 3 天前发布",
+      "odds": 4,
+      "value": 5,
+      "action": "今天投",
+      "action_kind": "go"
+    },
+    {
+      "rank": 2,
+      "title": "Forward Deployed Engineer",
+      "url": "https://www.linkedin.com/jobs/view/2222222222/",
+      "context": "Harbor Systems · 柏林混合 · 重发一周",
+      "odds": 3,
+      "value": 4,
+      "action": "本周投",
+      "action_kind": "later"
+    },
+    {
+      "rank": 3,
+      "title": "Product Analyst",
+      "url": "https://www.linkedin.com/jobs/view/3333333333/",
+      "context": "Vantage Analytics · 柏林现场 · 1,200 人已投",
+      "odds": 1,
+      "value": 3,
+      "action": "仅内推时投",
+      "action_kind": "later"
+    },
+    {
+      "rank": 4,
+      "title": "Staff Research Scientist",
+      "url": "https://www.linkedin.com/jobs/view/4444444444/",
+      "context": "Meridian AI · 柏林现场 · 要求博士",
+      "odds": 0,
+      "value": 1,
+      "action": "跳过",
+      "action_kind": "skip"
+    }
+  ],
+
+  "deepdives_heading": "今日新增 · 深挖",
+  "deepdives_note": "只对当天新出现、且判定值得投的岗位做完整分析；已覆盖过的岗位只更新状态。",
+  "deepdives": [
+    {
+      "hot": true,
+      "badge": "今日新增 · 唯一值得动的",
+      "title": "Solutions Engineer",
+      "company": "Northwind Labs",
+      "url": "https://www.linkedin.com/jobs/view/1111111111/",
+      "subtitle": "Job ID 1111111111 · 全远程（欧洲时区）· 全职 · 3 天前 · <b>2 位校友在职</b>",
+      "paras": [
+        "<b>公司什么档次：</b>B 轮、180 人的数据基础设施公司，客户以中型 SaaS 为主，去年营收翻倍。全远程，薪酬按欧元统一定价、不按所在城市打折。",
+        "<b>这个团队在干什么：</b>Solutions 团队负责把新客户从签约带到真正跑起来，JD 原文写着这个岗要「自己写脚本、自己上手调，而不是写方案交给别人做」。"
+      ],
+      "comp_line": "薪酬估算：<b>€6.5k – 8.5k / 月</b>，另有股权。超过你 €5k 的底线。",
+      "strengths": [
+        "JD 要求的 Python + SQL + API 集成，你上一份工作每天都在做",
+        "「客户现场从零交付」是你最完整的一段经历，可以直接举证",
+        "全远程，不需要处理搬家和签证"
+      ],
+      "gaps": [
+        "「3 年以上面向客户的工程经验」是明写门槛，你只有 2 年",
+        "没有做过大规模数据迁移，这是 JD 里的加分项"
+      ],
+      "verdict": "门槛差的那一年可以用交付完整度补，但要在简历第一段就把「独立从零交付」讲清楚。<b>今天投，同时找那 2 位校友里的一位发第一条消息，只问一个小问题。</b>"
+    }
+  ],
+
+  "board_heading": "全部岗位总表",
+  "board_note": "分数＝岗位对你的匹配度；<b>色灯＝公司质量</b>（前景 + 团队 + 是不是直接雇主）。中介那一档的分数只代表岗位本身对口，不代表公司好。",
+  "tiers": {
+    "s": {
+      "t": "S",
+      "title": "最值得投",
+      "sub": "公司好 · 岗位对口 · 已确认在招",
+      "desc": "公司强 + 岗位贴你 + 直接雇主。本周的产出应该全部在这一档。"
+    },
+    "a": {
+      "t": "A",
+      "title": "值得投",
+      "sub": "有价值但部分状态待确认",
+      "desc": "有价值，但要么需要自己再确认是否还开着，要么是次一级的实际投递目标。"
+    },
+    "broker": {
+      "t": "中介",
+      "title": "中介发布 · 先问出真雇主",
+      "sub": "发布的是猎头，不是真雇主",
+      "desc": "分数只代表岗位本身对口。第一步是问出客户是谁，再判断值不值得投。"
+    },
+    "out": {
+      "t": "外包",
+      "title": "外包 / 企业内部 IT / 方向不对",
+      "sub": "稳定，但看不出是在做自己的产品",
+      "desc": "适合要稳定和签证的保底选择，不是履历加分项。签之前先问清楚是哪个客户、哪个项目。"
+    }
+  },
+  "board": [
+    {
+      "tier": "s",
+      "score": 91,
+      "company": "Northwind Labs",
+      "role": "Solutions Engineer",
+      "level": "Mid",
+      "location": "全远程",
+      "remote": true,
+      "light": "green",
+      "channel": "直招",
+      "status": "open",
+      "note": "B 轮、180 人的数据基础设施公司，全远程，薪酬按欧元统一定价",
+      "gap": "「3 年以上面向客户的工程经验」明写门槛，你差一年",
+      "fix": "简历第一段直接讲「独立从零交付」，用完整度补年限",
+      "hook": "3 天前刚发，2 位校友在职；今天投",
+      "url": "https://www.linkedin.com/jobs/view/1111111111/",
+      "url_exact": true
+    },
+    {
+      "tier": "s",
+      "score": 84,
+      "company": "Harbor Systems",
+      "role": "Forward Deployed Engineer",
+      "level": "Mid–Senior",
+      "location": "柏林混合",
+      "remote": true,
+      "light": "green",
+      "channel": "直招",
+      "status": "open",
+      "note": "企业数据平台，重发一周仍在招",
+      "gap": "要求金融行业交付经验，你没有",
+      "fix": "用相邻行业的合规交付经历替代，别硬说自己懂金融",
+      "hook": "重发说明还在活跃招人；本周投",
+      "url": "https://www.linkedin.com/jobs/view/2222222222/",
+      "url_exact": true
+    },
+    {
+      "tier": "a",
+      "score": 66,
+      "company": "Vantage Analytics",
+      "role": "Product Analyst",
+      "level": "Mid",
+      "location": "柏林现场",
+      "remote": false,
+      "light": "yellow",
+      "channel": "直招",
+      "status": "open",
+      "note": "分析工具公司，岗位已挂一个月",
+      "gap": "1,200 人已投、六成是资深候选人；冷投期望值接近零",
+      "fix": "不冷投，只在拿到内推直达招聘经理时才投",
+      "hook": "内容对口但结构不利，把时间省给前两个",
+      "url": "https://www.linkedin.com/jobs/view/3333333333/",
+      "url_exact": true
+    },
+    {
+      "tier": "broker",
+      "score": 72,
+      "company": "Fieldstone Search",
+      "role": "AI Engineer（客户未具名）",
+      "level": "—",
+      "location": "柏林",
+      "remote": false,
+      "light": "yellow",
+      "channel": "中介",
+      "status": "open",
+      "note": "猎头发布，真雇主藏在后面",
+      "gap": "不知道真实雇主是谁，没法判断值不值",
+      "fix": "—（先问出客户名）",
+      "hook": "一封邮件问清客户是哪家，再决定投不投",
+      "url": "https://www.linkedin.com/jobs/search/?keywords=Fieldstone%20Search%20AI%20Engineer",
+      "url_exact": false
+    },
+    {
+      "tier": "out",
+      "score": 40,
+      "company": "Meridian AI",
+      "role": "Staff Research Scientist",
+      "level": "7+yr",
+      "location": "柏林现场",
+      "remote": false,
+      "light": "yellow",
+      "channel": "直招",
+      "status": "open",
+      "note": "研究型实验室，公司本身很好",
+      "gap": "要求博士学位 + 一作论文，是研究序列不是工程序列",
+      "fix": "—（不投）",
+      "hook": "公司留作人脉节点，等他们开工程岗时再动"
+    }
+  ],
+
+  "salary_unit": "月薪估算",
+  "salary_floor_label": "对比 €5k 底线",
+  "salary_note": "依据同级岗位公开区间与本地市场惯例，非官方数据，不作为谈判依据。",
+  "salary": [
+    { "label": "Northwind Labs · Solutions Engineer（远程）", "estimate": "€6.5k – 8.5k", "vs_floor": "超过", "floor_kind": "over" },
+    { "label": "Harbor Systems · Forward Deployed Engineer", "estimate": "€5.5k – 7k", "vs_floor": "超过", "floor_kind": "over" },
+    { "label": "Vantage Analytics · Product Analyst", "estimate": "€4.5k – 5.5k", "vs_floor": "擦线，面试前压实", "floor_kind": "edge" },
+    { "label": "Meridian AI · Staff Research Scientist", "estimate": "€7k – 9k", "vs_floor": "达标但方向不对，不投", "floor_kind": "under" }
+  ],
+
+  "skips": [
+    {
+      "title": "Meridian AI · Staff Research Scientist（4444444444）",
+      "url": "https://www.linkedin.com/jobs/view/4444444444/",
+      "reason": "要求博士学位 + 一作论文，是研究序列。硬投＝用有限的投递精力换很低的成功率。公司本身很好，留作人脉节点。"
+    }
+  ],
+
+  "leads_title": "顺带看到的其他岗位",
+  "leads": [
+    { "name": "Northwind Labs · Support Engineer", "note": "同一家公司的另一个开口，层级低一档，主线不顺时的备选" },
+    { "name": "Alder Cloud · Implementation Consultant", "note": "全远程，一周前发布，还没开 JD 细看" }
+  ],
+
+  "steps": [
+    "<b>今天：Northwind Labs 投出去。</b>简历第一段改成「独立从零交付」的叙述，把 Python + SQL + API 集成放在最前面。",
+    "<b>今天：给在 Northwind 的那位校友发第一条消息。</b>短、像人话、只问一个小问题，不发简历不讲故事。",
+    "<b>本周：Harbor Systems 投递。</b>不等校友回复。金融行业经验的缺口用相邻行业的合规交付替代，别硬说自己懂金融。",
+    "<b>不做的事：Vantage Analytics 不冷投。</b>只在拿到内推时才投，省下的时间给前两条。"
+  ],
+
+  "footer": "数据来源：LinkedIn 实时抓取（2026-03-14）。本页人物与公司均为虚构示例。薪酬区间为市场估算，非官方数据，不作为谈判依据；申请人数为抓取时点快照。标「待确认」的岗位投前请再打开一次岗位页核实。"
+}

@@ -1,0 +1,12 @@
+# 你自己的数据，绝对不要提交
+profile.json
+board.json
+*.board.json
+resume.*
+out.html
+calls.json
+*.out.json
+
+__pycache__/
+*.py[cod]
+.DS_Store
