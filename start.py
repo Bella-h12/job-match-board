@@ -92,7 +92,7 @@ def main():
     has_cli = shutil.which("claude") or os.path.exists(os.path.expanduser("~/.local/bin/claude")) or \
               shutil.which("codex") or os.path.exists(os.path.expanduser("~/.npm-global/bin/codex"))
     if not env.get("JMB_MODEL_KEY"):
-        print("\n--- 模型（用来写每岗点评和公司发展四问；没有它排名是空的）---")
+        print("\n--- 模型（可选：只写每岗「为什么 / 弹药 / 缺口 / 触达」的文案；分数和排名不靠它）---")
         if has_cli:
             print("检测到本机有 Claude Code / Codex，会直接用它（走你已有的订阅，不用 key）。")
             print("发给模型的是：每个岗的 JD 全文 + 你的事实清单（年限、能力项）。不发简历原文、不发邮箱。")
@@ -100,7 +100,7 @@ def main():
                 has_cli = False
         if not has_cli:
             print("没有本机 Claude Code / Codex。要么装一个，要么给一个 key（Anthropic 或 OpenAI 兼容格式）。")
-            print("**没有模型这一步会跳过，所有岗的优先级都会是空的。**")
+            print("没有模型也行：这步跳过，卡上少几行文案，分数和排名照旧。")
             k = getpass.getpass("模型 key（回车跳过）: ").strip()
             if k:
                 env["JMB_MODEL_KEY"] = k

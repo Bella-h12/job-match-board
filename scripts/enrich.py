@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""唯一需要模型的一步：给每个岗写「公司发展四问」和「行动建议 / 触达 / 弹药 / 缺口」。
+"""可选的一步：给每个岗写给人看的文案——「为什么」「弹药」「缺口」「触达路径」。
+
+**它不产生任何数字，不影响排名。**（2026-08-29 Bella：「标签和量化计算都是 Python 固定的，
+不要用模型。」）分数、公司发展、动作标签全在 score.py / make_board_json.py 里确定性算。
+没有模型 → 这些文案为空，卡上少几行字，排名照旧。
 
 用法：python3 scripts/enrich.py workspace/<名字>
 
@@ -9,12 +13,7 @@
   3. 本机的 `codex` 命令（Codex CLI，走你已有的订阅）
   4. 都没有 → 跳过，并且**明说排名会是空的**
 
-为什么这一步缺不得（2026-08-29 一个用户没输 key，看板上所有优先级都是横杠）：
-公司发展四问只有这一步会写，而规则是「适配度和公司发展缺任何一项就不给优先级」——
-没有它，每个岗都判未核，排名整个是空的。所以宁可用本机已有的 Claude Code / Codex，
-也不能让它静默跳过。
-
-产物 workspace/<名字>/prose.json —— 跟打分数据分开存，重跑打分不会冲掉它。
+prose.json —— 跟打分数据分开存，重跑打分不会冲掉它。
 纪律：公司发展四问每道要带出处，给不出出处一律记 no；触达路径不许编人名。
 """
 import io, json, os, shutil, subprocess, sys, urllib.request
@@ -45,8 +44,7 @@ else:
 
 if not BACKEND:
     print("没有模型可用：没有 JMB_MODEL_KEY，本机也没有 claude / codex 命令。")
-    print("⚠ 跳过点评 → 公司发展四问为空 → **所有岗都会判未核，排名是空的**。")
-    print("  三选一：装 Claude Code（claude.com/claude-code）/ 装 Codex CLI / export JMB_MODEL_KEY=...")
+    print("跳过文案：卡上少「为什么 / 弹药 / 缺口 / 触达」几行字，**分数和排名不受影响**。")
     sys.exit(0)
 print("模型后端：%s" % {"key": "自己的 key（%s / %s）" % (PROVIDER, MODEL),
                       "claude": "本机 Claude Code（走你的订阅）",
@@ -73,11 +71,10 @@ for f in glob.glob(os.path.join(WS, "jd-cache", "*-out.json")):
 
 SYSTEM = """你是求职情报值班员。只输出 JSON，不输出别的。
 判据铁律：
-1. 公司发展四问（ai / principal / growing / durable）每道取 yes/half/no，**每道必须带一句出处**（JD 或公司页原话）。给不出出处一律 no。
-2. 行动建议 act_short ≤ 15 个字，只说「今天投 / 本周投 / 先问再投 / 不投」+ 一句为什么。
-3. reach（触达路径）**绝不编人名**。JD 没露出招聘团队就写 kind="none"。
-4. ammo（弹药）只能引用候选人事实清单里有的东西；gapnote（缺口）要引 JD 原文。
-5. 不知道就说不知道，不要用「可能」「应该」编内容。"""
+1. 你不打分、不定动作——那些由代码算。你只写给人看的文案。
+2. reach（触达路径）**绝不编人名**。JD 没露出招聘团队就写 kind="none"。
+3. ammo（弹药）只能引用候选人事实清单里有的东西；gapnote（缺口）要引 JD 原文。
+4. 不知道就说不知道，不要用「可能」「应该」编内容。"""
 
 def ask(prompt):
     if BACKEND == "claude":
@@ -125,15 +122,14 @@ JD 原文：
 {text}
 
 输出 JSON：
-{{"growth_by": {{"ai":"yes|half|no","principal":"yes|half|no","growing":"yes|half|no","durable":"yes|half|no","why":"四道各一句出处"}},
- "why": "一句话结论 ≤40 字", "act": "行动建议一句", "act_kind": "go|ref|skip", "act_short": "≤15字",
+{{"why": "一句话结论 ≤40 字",
  "ammo": "候选人的弹药（只引事实清单）", "gapnote": "缺口（引 JD 原文）",
  "reach": {{"kind":"none|poster|alumni|referral","note":"怎么触达，不编人名"}}}}"""
     try:
         out = ask(prompt)
         out = out[out.index("{"): out.rindex("}") + 1]
         prose[r["id"]] = json.loads(out)
-        print("  %2d/%d  %s · %s  → %s" % (i, len(todo), r["co"][:20], r["role"][:30], prose[r["id"]].get("act_short", "")[:15]))
+        print("  %2d/%d  %s · %s  → %s" % (i, len(todo), r["co"][:20], r["role"][:30], prose[r["id"]].get("why", "")[:20]))
     except Exception as e:
         print("  %2d/%d  %s 失败：%s（留空，不编）" % (i, len(todo), r["co"][:20], str(e)[:60]))
     json.dump(prose, io.open(pp, "w", encoding="utf-8"), ensure_ascii=False, indent=1)

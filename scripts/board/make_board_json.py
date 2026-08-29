@@ -39,21 +39,35 @@ def clicked(meta):
     return int(m.group(1).replace(",", "")) if m else None
 
 
-def act_kind_of(p):
-    """动作标签只从文案推，不信模型自己给的 act_kind。
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import score as _score
+import glob as _glob
+_jd = {}
+for _f in _glob.glob(os.path.join(WS, "jd-cache", "*-out.json")):
+    for _it in json.load(io.open(_f, encoding="utf-8")):
+        try:
+            _jid = _it["call"]["args"]["job_id"]
+            _t = json.loads(_it["result"]).get("sections", {}).get("job_posting", "")
+            if _t and len(_t) > len(_jd.get(_jid, "")):
+                _jd[_jid] = _t
+        except Exception:
+            pass
 
-    2026-08-29 实测：模型给 Huntington 写「先问再投：年资微差」却标 go，Capgemini
-    「先问再投：确认缺口」也标 go——文案和标签打架，而标签直接决定第一屏放哪三张。
-    一个决定第一屏的字段不能靠模型自报；文案是给人看的，就按人看到的那句判。
-    """
-    t = ((p.get("act_short") or "") + " " + (p.get("act") or "")).strip()
-    if not t:
-        return "ref"
-    if re.match(r"^\s*(今天投|立即投|马上投)", t):
-        return "go"
-    if re.match(r"^\s*(不投|跳过|放弃|别投)", t):
-        return "skip"
-    return "ref"          # 本周投 / 先问再投 / 其他 → 都不是「今天」
+# 动作标签：纯代码，按适配度分档。2026-08-29 Bella：「标签和量化计算都是 Python 固定的，不要用模型。」
+ACT_GO, ACT_ASK = 60, 40
+
+
+def act_of(r):
+    fit = r.get("fit")
+    if fit is None:
+        return "ref", ""
+    if r.get("wall"):
+        return "skip", "不投：年限硬挡"
+    if fit >= ACT_GO:
+        return "go", "今天投：命中 %g/%d" % (r["hit"], r["tot"])
+    if fit >= ACT_ASK:
+        return "ref", "先问再投：命中 %g/%d" % (r["hit"], r["tot"])
+    return "skip", "不投：命中 %g/%d" % (r["hit"], r["tot"])
 
 
 jobs = []
@@ -81,14 +95,14 @@ for r in scored:
                       if r.get("kind") == "无硬门槛" else ""),
         reqs=dict(must=[[t, h] for t, h, _ in (r.get("must") or [])],
                   nice=[[t, h] for t, h in (r.get("nice") or [])]),
-        growth_by=p.get("growth_by"),
+        growth_by=_score.growth_from_jd(_jd.get(jid, ""), r.get("co", "")),
         pay_aed=p.get("pay_aed"), pay=p.get("pay"),
         clicked=clicked(meta), d1=None, applicants=None,
         senior="", apply="linkedin",
         # 下面这些是「看板」那一层，没写就留空，页面上不渲染
         why=p.get("why", ""), ammo=p.get("ammo", ""), gapnote=p.get("gapnote", ""),
-        act=p.get("act", ""), act_kind=act_kind_of(p),
-        act_short=p.get("act_short", ""),
+        act=(p.get("act") or act_of(r)[1]), act_kind=act_of(r)[0],
+        act_short=act_of(r)[1],
         reach=p.get("reach") or dict(kind="none", note=""),
         kind="job", note="",
     ))

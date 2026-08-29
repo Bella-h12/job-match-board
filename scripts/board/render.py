@@ -457,7 +457,7 @@ def card(j, rank):
         _d = ''.join('<span class="d-dim">%s <b>%s</b> %s</span>' % (GROWTH_MARK[v], sc, lbl)
                      for lbl, v, sc in j["growth_detail"])
         _why = (j.get("growth_by") or {}).get("why", "")
-        o.write(f'    <div class="jc-why-n"><b>公司发展 {j["v_growth"]}</b> ＝ 四道各 25 分：{_d}'
+        o.write(f'    <div class="jc-why-n"><b>公司发展 {j["v_growth"]}</b> ＝ 两问各 50 分：{_d}'
                 + (f'<span class="d-note">{_why}</span>' if _why else '') + '</div>\n')
     if j.get("unscored"):
         _why = j.get("unscored_why") or ""
@@ -686,9 +686,8 @@ _today = [_by_id[i] for i in TODAY_IDS if i in _by_id]
 _today.sort(key=lambda j: -(j["prio"] if j["prio"] is not None else -1))
 
 TODAY_PICKS = 3
-_go = [j for j in ranked if j["act_kind"] == "go"][:TODAY_PICKS]
-if len(_go) < TODAY_PICKS:                      # 没有足够的「今天投」就补高分的，别硬凑
-    _go += [j for j in ranked if j not in _go][:TODAY_PICKS - len(_go)]
+# 2026-08-29 Bella：「按照最优先排 3 个」。决策台 = 优先级前三，不再看动作标签。
+_go = ranked[:TODAY_PICKS]
 
 WEEK = '一二三四五六日'[TODAY.weekday()]
 
@@ -861,7 +860,7 @@ hd.write('      <p><b>适配度 ＝ 命中条数 / 要求总条数</b>，清单�
          '逐条落在每张卡的「门槛原文」里，半条记 0.5。JD 里的<b>反向限定</b>'
          '（例如 JD 明写「本岗面向初中级候选人」）不揉进这个比例，'
          '写成一条带原文的具名扣分单独列出来。</p>\n')
-hd.write('      <p><b>公司发展 ＝ 四道各 25 分</b>：①<b>碰的是 AI 产品本身</b>吗'
+hd.write('      <p><b>公司发展 ＝ 两问各 50 分</b>：①<b>碰的是 AI 产品本身</b>吗'
          '（不是「一家用 AI 的公司」）②<b>雇主是甲方</b>吗（甲方 &gt; 甲方的交付方 &gt; 招聘代理/人力外包）'
          '③<b>公司在长</b>吗（融资 / 扩编 / 本地实体，<b>要有可核出处，猜的一律记 0</b>）'
          '④<b>三年后还值钱</b>吗（前沿实验室·生态大厂 &gt; 本土甲方 &gt; 通用外包）。'

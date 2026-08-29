@@ -49,6 +49,16 @@ for bad, why in [(dict(must=[("短", 1)]), "原文太短要报错"),
     except AssertionError:
         ck(why, True)
 
+print("公司发展两问（确定性，从 JD 文本）")
+g = score.growth_from_jd("We build LLM agents. Our agentic platform uses RAG and prompt engineering. " * 5, "Acme")
+ck("AI 词密度高 → ai=yes", g["ai"] == "yes", g)
+g = score.growth_from_jd("Our client, a bank, is hiring a QA engineer via our staffing team.", "Hire Feed")
+ck("代招字眼 → principal=no", g["principal"] == "no", g)
+g = score.growth_from_jd("We are a bank hiring a QA engineer for our own team.", "Bank")
+ck("没有代招字眼 → principal=yes", g["principal"] == "yes", g)
+v, d = score.growth_of(dict(growth_by=dict(ai="yes", principal="no")))
+ck("两问 50+0 = 50", v == 50 and len(d) == 2, (v, d))
+
 print("逐条判定（拿一份合成事实清单）")
 j = F.Judge(dict(years_total=5, title_years={r"product (manage(ment|r)|owner)": 0,
                                              r"data analyst|analytics": 5},

@@ -6,49 +6,59 @@
 所以 gate-score.py 里另有一条断言盯着 rebuild-board.py 确实 import 了这里）。
 """
 
-# ================================================================ 公司发展（0–100）
-# 2026-08-22 重写。Bella 的原话：「公司的这个评分怎么来的，说的也不清晰。」
-# 她是对的，而且比「不清晰」更糟——**它压根没有来处**：整个 8 月这一项都是
-#   GROWTH_BY_LIGHT = dict(green=85, yellow=50, red=15)
-# 也就是说，占总分 40% 的这个数只有三个取值，全靠一盏手工点的色灯，
-# 而「色灯凭什么是绿的」页面上一个字都没写。三个取值意味着：81 个岗里，
-# 44 个公司发展是 85、37 个是 50——**它没有在区分公司，它只是把色灯换了个写法。**
+# ================================================================ 公司发展（0–100，确定性）
+# 2026-08-29 重写。Bella：「标签还有一些量化计算都是 Python 固定的，不要用模型。」
 #
-# 现在改成四道可核的问题，各 25 分，每一道都必须带一句能对回原文/公开事实的依据。
-# 挑这四道的判据是「三年后回头看，这段经历还值不值钱」——不是公司现在多有名。
-# 标签写短是为了在 390px 上一行一条读得下（8-22 实测长句在手机上横向溢出）；
-# 每道题完整的判据写在下面这段注释里，也写在页面「评分说明」那个折叠块里。
-#   ai        这个岗每天碰的是不是 AI 产品本身（不是「一家用 AI 的公司」）
-#   principal 雇主是不是甲方（甲方 > 甲方的交付方 > 招聘代理/人力外包）——决定这段经历在简历上叫什么
-#   growing   公司在不在长（融资 / 扩编 / UAE 实体与牌照，要有可核出处，猜的一律记 0）
-#   durable   这段经历三年后还值不值钱（前沿实验室·生态大厂 > 本土甲方 > 通用外包）
-GROWTH_DIMS = [
-    ("ai",        "碰的是 AI 产品本身"),
-    ("principal", "雇主是甲方"),
-    ("growing",   "公司在长"),
-    ("durable",   "三年后还值钱"),
-]
-GROWTH_SCALE = {"yes": 25, "half": 12, "no": 0}
+# 上一版四问由模型判（ai / principal / growing / durable 各 25），后果：
+#   ① 没有模型 → 四问全空 → 每个岗判未核 → **排名整个是空的**（一个没输 key 的用户实测）
+#   ② 模型给的取值带理由（「no（JD 未出现…）」）、标签和文案打架，不可靠
+# 四问里只有两问能从 JD 文本里确定性判出来：
+#   ai         这个岗每天碰的是不是 AI 产品本身 —— JD 里 AI/LLM/agent 这类词的密度
+#   principal  雇主是不是甲方 —— JD 有没有「our client / staffing / recruitment agency /
+#              contract staffing / on behalf of」这类代招字眼
+# 另两问（在不在长、三年后值不值钱）JD 里根本没有，代码判不了 —— **不进分数**，
+# 不拿模型猜一个数顶上。所以公司发展 = 两问各 50。
+import re as _re
+
+AI_RX = _re.compile(r"\b(?:LLM|LLMs|large language model|agentic|AI agent|GenAI|generative AI|"
+                    r"machine learning|RAG|prompt|foundation model|model training|inference)\b", _re.I)
+AGENCY_RX = _re.compile(r"our client|on behalf of (?:our|a) client|staffing|recruitment agency|"
+                        r"recruiting agency|talent partner|contract staffing|C2C|W2 contract|"
+                        r"placement agency|consultancy is hiring for", _re.I)
+GROWTH_DIMS = [("ai", "碰的是 AI 产品本身"), ("principal", "雇主是甲方")]
+GROWTH_SCALE = {"yes": 50, "half": 25, "no": 0}
 GROWTH_MARK = {"yes": "✓", "half": "½", "no": "✗"}
 
+
+def growth_from_jd(jd_text, company=""):
+    """从 JD 文本确定性判两问。返回 dict(ai=…, principal=…, why=…)，每道带判据。"""
+    t = jd_text or ""
+    n_ai = len(AI_RX.findall(t))
+    words = max(1, len(t.split()))
+    density = n_ai * 1000.0 / words           # 每千词出现几次
+    if density >= 8 or n_ai >= 12:
+        ai = "yes"
+    elif density >= 2 or n_ai >= 3:
+        ai = "half"
+    else:
+        ai = "no"
+    ag = AGENCY_RX.search(t) or AGENCY_RX.search(company or "")
+    principal = "no" if ag else "yes"
+    return dict(ai=ai, principal=principal,
+                why="ai：JD 里 AI 类词 %d 次（每千词 %.1f）；principal：%s" % (
+                    n_ai, density,
+                    ("命中代招字眼「%s」" % ag.group(0)) if ag else "JD 无代招/外包字眼"))
+
+
 def fmtnum(x):
-    """5.5 写成 5.5，5.0 写成 5 —— 半条命中的岗（Halian 5.5/7）不许被四舍五入掉。"""
     return ('%g' % x)
 
 
 def growth_of(j):
-    """返回 (分数, 逐条明细) 或 (None, None)。
-
-    **未核就是 None，不许回落到色灯。**（R48 / R10-⑨：取不到就说取不到，
-    绝不拿一个看起来正常的数顶上——那正是这一项之前干的事。）
-    数据里的写法：growth_by=dict(ai="yes", principal="no", growing="half", durable="yes",
-                                why="每条为什么，带可核出处")
-    """
+    """→ (分数, 逐条明细) 或 (None, None)。没有 growth_by 就是未核（不许回落到色灯）。"""
     g = j.get("growth_by")
     if not g:
         return None, None
-    # 模型/别人写的取值可能带理由（实测 DeepSeek 写了「no（JD 未出现 AI 相关表述，无出处）」）。
-    # 只认开头的 yes / half / no；认不出一律按 no —— 给不出出处就是 no，这本来就是规则。
     def _norm(v):
         v = str(v or "no").strip().lower()
         for k in ("yes", "half", "no"):
