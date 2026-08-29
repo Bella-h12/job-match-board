@@ -55,7 +55,7 @@ if todo:
             m = re.search(pat, txt, re.I)
             return cast(m.group(1)) if m else None
         have[s] = dict(
-            employees=g(r"Company size\\n([\d,]+-?[\d,]*\+?) employees"),
+            employees=g(r"([\d,.]+[KkMm]?(?:-[\d,.]+[KkMm]?)?\+?) employees"),
             founded=g(r"Founded\\n(\d{4})", int),
             industry=g(r"Industry\\n([^\\n]+)"),
             growth_2y=g(r"(-?\d+)%\s*(?:company-wide )?(?:2|two)[- ]?year growth", int),

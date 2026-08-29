@@ -35,6 +35,16 @@ GROWTH_SCALE = {"yes": 25, "half": 12, "no": 0, "na": 0}
 GROWTH_MARK = {"yes": "✓", "half": "½", "no": "✗", "na": "未核"}
 
 
+def _emp_upper(emp):
+    """「51-200」→200，「501-1K」→1000，「10,001+」→10001。LinkedIn 两种写法都有。"""
+    t = (emp or "").split("-")[-1].replace(",", "").strip()
+    m = _re.match(r"(\d+(?:\.\d+)?)\s*([KkMm])?", t)
+    if not m:
+        return 0
+    n = float(m.group(1)); u = (m.group(2) or "").upper()
+    return int(n * (1000 if u == "K" else 1000000 if u == "M" else 1))
+
+
 def growing_from_company(c):
     """从公司页事实判「在不在长」。返回 (yes/half/no/na, 判据)。"""
     if not c:
@@ -46,10 +56,17 @@ def growing_from_company(c):
         if ten is not None and ten < 1.5:
             v = "half" if v == "yes" else "no"; why += "，但中位任期 %.1f 年偏短" % ten
         return v, why
+    if emp and not founded:                 # 只有规模没年份（大厂公司页常不写 Founded）
+        big = _emp_upper(emp)
+        if big >= 1001:
+            return "half", "成熟大厂（%s 人），增速与成立年份未读到" % emp
+        if big >= 201:
+            return "half", "中型公司（%s 人），增速与成立年份未读到" % emp
+        return "na", "只有规模 %s，无成立年份、无增速" % emp
     if founded and emp:                     # 没 Insights：成立年份 × 规模粗判
         import datetime
         age = datetime.date.today().year - founded
-        big = int(_re.sub(r"[^\d]", "", emp.split("-")[-1]) or 0)
+        big = _emp_upper(emp)
         if age <= 6 and big >= 51:
             return "yes", "成立 %d 年已到 %s 人" % (age, emp)
         if big >= 1001:
