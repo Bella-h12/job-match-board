@@ -39,6 +39,23 @@ def clicked(meta):
     return int(m.group(1).replace(",", "")) if m else None
 
 
+def act_kind_of(p):
+    """动作标签只从文案推，不信模型自己给的 act_kind。
+
+    2026-08-29 实测：模型给 Huntington 写「先问再投：年资微差」却标 go，Capgemini
+    「先问再投：确认缺口」也标 go——文案和标签打架，而标签直接决定第一屏放哪三张。
+    一个决定第一屏的字段不能靠模型自报；文案是给人看的，就按人看到的那句判。
+    """
+    t = ((p.get("act_short") or "") + " " + (p.get("act") or "")).strip()
+    if not t:
+        return "ref"
+    if re.match(r"^\s*(今天投|立即投|马上投)", t):
+        return "go"
+    if re.match(r"^\s*(不投|跳过|放弃|别投)", t):
+        return "skip"
+    return "ref"          # 本周投 / 先问再投 / 其他 → 都不是「今天」
+
+
 jobs = []
 for r in scored:
     if r.get("closed"):
@@ -58,6 +75,10 @@ for r in scored:
         light="yellow",                    # 公司灯：没核过一律黄，不许猜绿
         gate="ok", gate_txt=gate_txt,
         # 打分的三项：适配度来自逐条判定；公司发展和薪资没核就是 None（页面写「未核」）
+        unscored_why=("JD 抠出的硬性要求只有 %d 条，不足 4 条不当清单——打开 JD 自己看一眼" % (r.get("tot") or 0)
+                      if r.get("kind") == "未核" else
+                      "JD 里没有可筛的硬性要求（没年限、没学位、没必备技能）——不是 100%，是没门槛"
+                      if r.get("kind") == "无硬门槛" else ""),
         reqs=dict(must=[[t, h] for t, h, _ in (r.get("must") or [])],
                   nice=[[t, h] for t, h in (r.get("nice") or [])]),
         growth_by=p.get("growth_by"),
@@ -66,7 +87,7 @@ for r in scored:
         senior="", apply="linkedin",
         # 下面这些是「看板」那一层，没写就留空，页面上不渲染
         why=p.get("why", ""), ammo=p.get("ammo", ""), gapnote=p.get("gapnote", ""),
-        act=p.get("act", ""), act_kind=p.get("act_kind", "ref"),
+        act=p.get("act", ""), act_kind=act_kind_of(p),
         act_short=p.get("act_short", ""),
         reach=p.get("reach") or dict(kind="none", note=""),
         kind="job", note="",

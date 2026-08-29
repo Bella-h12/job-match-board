@@ -678,7 +678,8 @@ def row_html(j, rank):
 # 8-24 个性化页扫 5 页、失败页 0、118 个岗、30 条没见过、19 份 JD 全开、净进池 11。
 # ⚠ 这个列表只放**今天**净进池的 ID —— 昨天那批到今天就是「积压」，它们该靠自己的分数排，
 #   不该再占「今天新扫到」这个位置（这颗 chip 的数只能来自它自己那一个来源，R7）。
-TODAY_IDS = ["4458373508", "4459800577", "4436769556"]
+# 「今天新扫到」的 ID 只能来自数据（原来写死着某个人的三个岗位 ID）
+TODAY_IDS = list(_B.get("new_today_ids") or [])
 _by_id = {j["id"]: j for j in JOBS}
 _today = [_by_id[i] for i in TODAY_IDS if i in _by_id]
 _today.sort(key=lambda j: -(j["prio"] if j["prio"] is not None else -1))
