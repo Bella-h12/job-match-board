@@ -460,10 +460,11 @@ def card(j, rank):
         o.write(f'    <div class="jc-why-n"><b>公司发展 {j["v_growth"]}</b> ＝ 四道各 25 分：{_d}'
                 + (f'<span class="d-note">{_why}</span>' if _why else '') + '</div>\n')
     if j.get("unscored"):
+        _why = j.get("unscored_why") or ""
         o.write(f'    <div class="jc-why-n warn"><b>这个岗没有优先级</b>——'
                 f'{"、".join(j["unscored"])}，所以不参与排名。'
-                f'<span class="d-note">以前这种情况会照样给一个数（适配度凭空写、公司发展按色灯换算），'
-                f'排序看起来正常但没有来处。现在宁可空着。</span></div>\n')
+                f'{("<br>" + html.escape(_why)) if _why else ""}'
+                f'<span class="d-note">空着比编一个数诚实：这种情况以前会照样给一个数，排序看起来正常但没有来处。</span></div>\n')
     # gate_txt 里写的是 <b> 标记（和 why / ammo / gapnote 一样），escape 会把它变成
     # 屏幕上的 &lt;b&gt; 字面量 —— 8-13 在线上抓到，21/36 张卡的「门槛原文」都是这样。
     # 数据里已断言过没有裸露的 & 和 <（只有 <b></b>），所以这里原样输出。
