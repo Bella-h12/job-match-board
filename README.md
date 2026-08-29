@@ -5,30 +5,24 @@
 
 **每个分数都能点开看它是从 JD 哪句话来的。** 这是它跟别的匹配工具唯一的区别。
 
-## 接入（四样东西）
+## 接入：一条命令
 
 ```bash
 git clone https://github.com/Bella-h12/job-match-board && cd job-match-board
-
-# 1  简历（.pdf / .docx / .txt）。会问你两件事：想在哪个地区找、LinkedIn 从哪页读
-#    方向不用填，脚本从简历推（要改就 --roles）；显示名默认取简历第一行（要改就 --display-name）
-python3 scripts/setup_user.py --name alex --resume ~/Desktop/resume.pdf
-
-# 2  ⚠ 本人过一遍 workspace/alex/facts.json，把 confirmed 改成 true（理由见下）
-
-# 3  LinkedIn —— 用你自己已登录的浏览器（装 uv，脚本自己起 mcp-server-linkedin）
-python3 scripts/fetch_jobs.py workspace/alex
-
-# 4  邮箱（可选）—— IMAP，Gmail 要「应用专用密码」；密码只走环境变量
-export JMB_EMAIL_PASS='...'
-python3 scripts/fetch_inbox.py workspace/alex
-
-# 5  你自己的模型（可选，只用来写每岗的点评；不给就跳过，看板照出但决策台为空）
-export JMB_MODEL_KEY=...  JMB_MODEL_PROVIDER=openai  JMB_MODEL_BASE=https://api.deepseek.com/v1  JMB_MODEL=deepseek-v4-flash
-
-# 6  出看板
-bash scripts/build.sh workspace/alex      # → workspace/alex/board.html
+python3 start.py
 ```
+
+它按顺序问你，每一步都要你确认才往下走：
+
+1. **简历在哪** → 抽出事实清单（总年限、每个职位几年、简历上有/没有什么）→ **你逐条确认**
+2. **想在哪个地区找**（必填）+ **LinkedIn 从哪页读**（有「top applicant」推荐页就贴 URL，没有就走搜索）
+3. **从简历推出的岗位方向** → 搜岗就按这几个词搜 → **你确认或改**
+4. **邮箱**（必填，回执和面试邀约靠它进台账）+ **你自己的模型 key**（可选，只用来写每岗点评）
+
+然后用你登录的浏览器抓岗、逐条对 JD 打分、写点评、出看板 → `workspace/<你>/board.html`。
+以后每天重跑 `python3 start.py`，只会重抓岗重打分，不会重复问已确认的。
+
+前置：Chrome 里登录好 LinkedIn；装 [uv](https://astral.sh/uv)（脚本用它起 mcp-server-linkedin）。
 
 ## 为什么第 2 步不能省
 
