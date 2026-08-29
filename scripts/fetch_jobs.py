@@ -58,7 +58,6 @@ def main():
     # ⚠ search_jobs 只给「被选中那一条」的 Job ID，其余条目只有标题（SKILL §31，2026-08-11 实测）。
     # 所以要两段：第一段从文本里抠出「标题 | 公司」，第二段用「公司名 + 岗位名」定向补搜，
     # 那条几乎必然成为 Selected，ID 就拿到了。第一版只跑第一段，美国 QA 岗 1,000+ 条结果、0 个 ID。
-    import re
     ids, seen = [], set()
     pairs = []
     for it in json.load(io.open(s_out, encoding="utf-8")):

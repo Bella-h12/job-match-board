@@ -98,6 +98,7 @@ def pay_score(j):
     return None                        # 未披露 → 不计入
 
 def freshness(d):
+    if d is None: return 0          # 页面没给发布天数：不加分也不猜（原版每岗都有，新用户不一定）
     if d <= 2: return 6
     if d <= 7: return 4
     if d <= 14: return 2
