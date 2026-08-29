@@ -101,6 +101,24 @@ with tempfile.TemporaryDirectory() as d:
        any(v > 0 for k, v in (f.get("title_years") or {}).items() if "data analyst" in k), f.get("title_years"))
     ck("草稿默认 confirmed=false", f.get("confirmed") is False)
 
+print("简历解析（陌生简历撞出来的四个坑）")
+with tempfile.TemporaryDirectory() as d:
+    cv = ("李四\n某公司 — 自动化测试工程师(派驻)\n2025.09 至今\n负责……\n"
+          "另一公司 — 测试工程师\n2021.07 — 2024.03\n服务端测试(2023.06 — 2024.03):\n客户端测试(2021.07 — 2023.06):\n"
+          "技能: Python, pytest\n")
+    io.open(d + "/cv.txt", "w", encoding="utf-8").write(cv)
+    r = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "make_facts.py"), d + "/cv.txt", d],
+                       capture_output=True, text=True)
+    f = json.load(io.open(d + "/facts.json", encoding="utf-8")) if r.returncode == 0 else {}
+    qa = next((v for k, v in (f.get("title_years") or {}).items() if "qa" in k), 0)
+    ck("职位名在日期上一行也认得出（专项年限不为空）", qa > 3, f.get("title_years"))
+    ck("重叠区间合并不相加（2021.07–2024.03 的两个子段不能算两遍）",
+       f.get("years_total") and 3.5 <= f["years_total"] <= 4.2, f.get("years_total"))
+    ck("「2025.09 至今」能解析（最近那段要算进去）",
+       any("至今" in x.get("line", "") for x in f.get("_spans", [])), [x.get("line") for x in f.get("_spans", [])])
+    ck("方向从简历推出（QA 简历不许被推成 Data Analyst）",
+       any("QA" in x or "SDET" in x or "Test" in x for x in f.get("suggested_roles", [])), f.get("suggested_roles"))
+
 print()
 print("全绿" if not FAIL else "变红：%s" % FAIL)
 sys.exit(1 if FAIL else 0)

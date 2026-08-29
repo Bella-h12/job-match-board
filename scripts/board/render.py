@@ -482,8 +482,11 @@ def card(j, rank):
         # 2026-08-28 新增两个出口（R34：复用别的 kind 会让页面印出一句假话）：
         #   agency＝猎头代理，本板口径是「不投这个岗也值得加个顾问」，不是熟人也不是校友；
         #   live＝这条线上已经有在跑的对话（对方来过信/面过她），跟冷触达完全两件事。
-        tag = dict(none="无人可触达", alum="校友线", warm="熟人线", ref="并到另一条",
-                   hire="同岗前辈线", agency="猎头线", live="在跑的对话")[r["kind"]]
+        # 模型/别人写的 kind 可能超出这几种（实测 DeepSeek 写了 poster / alumni / referral）。
+        # 认不出的不崩、也不编——按「无人可触达」渲染，note 原样带上。
+        tag = dict(none="无人可触达", alum="校友线", alumni="校友线", warm="熟人线", ref="并到另一条",
+                   referral="熟人线", poster="发帖人线", hire="同岗前辈线", agency="猎头线",
+                   live="在跑的对话").get(r.get("kind"), "无人可触达")
         o.write(f'      <p class="jc-reach-none"><span class="rtag">{tag}</span>{r["note"]}</p>\n')
     o.write(f'    </div>\n')
     o.write(f'  </div>\n')
