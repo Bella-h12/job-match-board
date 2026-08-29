@@ -78,9 +78,9 @@ ul.req li b{{position:absolute;left:0;top:5px}}
 它们不给百分数也不参与排名——「没门槛」和「门槛全中」是两件事。
 <b>{len(unk)} 个抄不出要求清单</b>，标未核，同样不给分。空着比编一个数诚实。</div>
 </div>"""
-    out = os.path.join(ws, "board.html")
+    out = os.path.join(ws, "matches.html")
     io.open(out, "w", encoding="utf-8").write(doc)
-    print("→ %s（%d 张卡）" % (out, len(live)))
+    print("→ %s（%d 张卡 · 简版匹配表）" % (out, len(live)))
 
 
 if __name__ == "__main__":

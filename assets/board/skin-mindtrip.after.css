@@ -1,0 +1,202 @@
+  /* ============================================================
+     皮肤 · Mindtrip · 元件层（装在 style.css **之后**）
+     Hallmark · studied-DNA (source: image, Mindtrip 截图) · 结构不动、只换视觉层
+     pre-emit critique: P5 H5 E4 S5 R5 V4
+     token 全部来自 skin-mindtrip.css，这里一个色值都不写死。
+     三条主要动作：
+       ① 描边卡 → 实底卡（灰底页面上用白、白底页面上用灰），hover 只加深底色
+       ② 全大写 + 字距的 kicker / 编号 / 等宽字全部拆掉，换成句子式大小写
+       ③ 侧栏从「编号清单」变成「图标胶囊导航」（图标走 CSS mask，DOM 不动）
+     ============================================================ */
+
+  /* ---------- 基础排版 ---------- */
+  body{font-size:15px;line-height:1.55}
+  b,strong{font-weight:600}
+  a.jd-link{border-bottom-color:var(--line-strong)}
+  code{background:var(--surface-2);border-radius:8px}
+  /* 数字对齐靠 tabular-nums，不靠等宽字体（这套没有第二支字） */
+  .t10sc b,.jc-score b,.tc-score,.fn b,.sn b,.jc-mini b,.tc-mini b,.hd-chip b,
+  .lg-counts,.t10rank,.jc-rank,.ablk-n{font-variant-numeric:tabular-nums}
+
+  /* ---------- ② 拆掉全大写 kicker / 字距 ---------- */
+  .part-no,.col h4,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked,.msg .lbl,
+  .sn-cap,.sn-x,.btn,.today-date,.t10sc small,.jc-score small,.jc-gate b:first-child,
+  .grp-badge,.chip,.hd-chip,.callout .tag,details.fold .tag,.lg-stage,.vz-st,.rtag,.prospect{
+    text-transform:none;letter-spacing:0;
+  }
+  .part-no,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked{color:var(--faint);font-weight:500}
+  .col h4{color:var(--ink-2)}
+  .today-date{font-size:13px;color:var(--faint)}
+
+  /* ---------- 标题：字号 + 字重扛层级，不靠颜色 ---------- */
+  .today-h{font-size:40px;letter-spacing:-.032em;font-weight:700;margin-bottom:24px}
+  .part h2,h2{font-size:22px;font-weight:700;letter-spacing:-.022em}
+  .rest-hd h2{font-size:22px}
+  h3,.grp-t,.lg-t,.trk-hd h3,.vz-t,.tc-co,.jc-co{font-weight:600;letter-spacing:-.015em}
+
+  /* ---------- ① 实底卡：描边一律拆掉 ---------- */
+  .tcard,.t10,.ledger,.callout,details.fold,.jc-gate,.col,.qbox,.hd-note>p,.gate,.msg,.post{
+    border-color:transparent;
+  }
+  .tcard,.t10,.ledger,.callout,details.fold,.col,.qbox,.hd-note>p,.gate,.msg{
+    background:var(--surface);
+  }
+  .tcard{border-radius:var(--r-lg);padding:22px 22px 18px;transition:background .12s ease}
+  .tcard:hover{background:var(--surface-2);border-color:transparent}
+  .tc-score{font-size:50px;color:var(--ink);letter-spacing:-.045em;margin-bottom:14px;font-weight:700}
+  .tc-co{font-size:19px}
+  /* 「为什么是它」从左侧竖线改成薄荷胶囊（截图里唯一的彩色面）。
+     align-self 必须写——.tcard 是 flex column，inline-block 在这里照样被拉满整行。 */
+  .tc-why{
+    color:var(--good);border-left:none;padding:6px 13px;border-radius:999px;
+    background:var(--good-bg);display:inline-block;align-self:flex-start;max-width:100%;
+    font-size:13.5px;font-weight:600;
+  }
+  .tc-mini,.jc-mini{color:var(--faint);font-size:12.5px}
+  .tc-ops{border-top:1px solid var(--line);padding-top:14px}
+
+  /* 灰盘之上的卡片要反过来用白底，否则两层灰糊在一起 */
+  .tcard .callout,.jc .col,.jc .jc-gate,.jc .qbox,.ledger .col,.lg-body .qbox,
+  .jc .callout,.lg-body .callout,.trk-body .qbox,.trk-body .col{
+    background:var(--pill);
+  }
+
+  .t10,.ledger{border-radius:var(--r-lg)}
+  .t10row,.lg-row,.vz-row{border-top-color:var(--line)}
+  .t10row:hover,.lg-sum:hover{background:var(--surface-2)}
+  .t10row.hot{background:var(--surface-2);border-left-color:var(--ink)}
+  .t10sc b,.jc-score b{color:var(--ink);font-weight:700}
+
+  /* 岗位卡：实底 + 左侧 2px 语义色（唯一保留的彩色结构件） */
+  .jc{
+    background:var(--surface);border:none;border-left:2px solid transparent;
+    border-radius:var(--r-md);margin:12px 0;transition:background .12s ease;
+  }
+  .jc:hover{background:var(--surface-2);border-color:transparent}
+  .jc.green{border-left-color:var(--good)}
+  .jc.yellow{border-left-color:var(--warn)}
+  .jc.red{border-left-color:var(--bad)}
+  .jc-gate{border:none;border-radius:var(--r-md)}
+  .jc-gate b{color:var(--faint);font-weight:500}
+  .col{border:none;border-radius:var(--r-md)}
+
+  details.fold{border:none;border-radius:var(--r-md)}
+  details.fold[open]>summary{border-bottom:1px solid var(--line)}
+  details.fold.thin{background:none}
+  details.fold.thin>summary:hover{color:var(--ink)}
+  .callout{border:none;border-radius:var(--r-md)}
+
+  /* ---------- ③ 胶囊控件 ---------- */
+  .btn,.hd-note>summary,.hd-chip,.chip,.grp-badge,.act-s,.lg-stage,.vz-st,.rtag,
+  .prospect,a.t10more,.jc-more{border-radius:999px}
+  .btn{
+    font-size:13px;font-weight:500;padding:9px 16px;border:none;
+    background:var(--surface-2);color:var(--ink);
+  }
+  .btn:hover{background:var(--line-strong);color:var(--ink);border:none}
+  .btn b{color:var(--ink);font-weight:600}
+  .chip{background:var(--pill);border:1px solid var(--line);font-size:12px;padding:3px 10px}
+  .grp-badge{background:var(--pill);border:1px solid var(--line);font-size:12px;padding:3px 10px}
+  .grp-badge.new{color:var(--ink);border-color:var(--line-strong);background:var(--surface-2)}
+  .hd-chip{background:var(--surface-2);border:none;font-size:12.5px;padding:5px 12px}
+  .hd-note>summary{border:1px solid var(--line);font-size:12.5px;padding:5px 12px}
+  .hd-note>summary:hover{color:var(--ink);border-color:var(--line-strong)}
+  .hd-note>p{border:none;border-radius:var(--r-md)}
+  .act-s{border-color:var(--line);background:var(--pill)}
+  .act-s.skip{background:transparent;border-color:var(--line)}
+  .mark{border-color:var(--line-strong);background:var(--pill)}
+  .mark:hover{border-color:var(--ink);color:var(--ink)}
+
+  /* ---------- 漏斗：分割线 → 四块灰砖 ---------- */
+  .funnel{border-top:none;gap:10px;padding-top:8px}
+  .fn{
+    border-left:none;padding:16px 18px;border-radius:var(--r-md);
+    background:var(--surface);transition:background .12s ease;
+  }
+  .fn:first-child{padding-left:18px}
+  .fn:hover{background:var(--surface-2)}
+  .fn b{font-size:28px;color:var(--ink)}
+  .fn:hover b{color:var(--ink)}
+  .fn span{color:var(--ink-2)}
+
+  /* ---------- 侧栏：图标胶囊导航 ---------- */
+  .side{background:var(--bg);border-right:1px solid var(--line);gap:14px}
+  .side-brand{
+    display:flex;align-items:center;gap:9px;font-size:17px;font-weight:700;letter-spacing:-.025em;
+    padding:2px 10px;
+  }
+  .side-brand::before{
+    content:"";width:20px;height:20px;flex:0 0 auto;background:currentColor;
+    -webkit-mask:var(--ic-spark) center/contain no-repeat;mask:var(--ic-spark) center/contain no-repeat;
+  }
+  .side-brand span{font-size:12.5px;color:var(--faint);margin-left:2px}
+  .sn{gap:1px}
+  .sn-step{border-top:none;padding:0}
+  .sn a{
+    align-items:center;gap:11px;border-radius:999px;padding:8px 12px;
+    transition:background .1s ease,color .1s ease;
+  }
+  .sn a:hover{background:var(--surface)}
+  .sn-h{font-size:15px;font-weight:500;padding:0}
+  .sn-h em{display:none}
+  .sn-h::before,.sn-s.sn-ic::before{
+    content:"";width:19px;height:19px;flex:0 0 auto;background:currentColor;opacity:.8;
+    -webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat;
+  }
+  .sn a[href="#apply"]{--ic:var(--ic-send)}
+  .sn a[href="#waiting"]{--ic:var(--ic-clock)}
+  .sn a[href="#interviewing"]{--ic:var(--ic-chat)}
+  .sn a[href="#offers"]{--ic:var(--ic-award)}
+  .sn a[href="#rejected"]{--ic:var(--ic-x)}
+  .sn a[href="#visible"]{--ic:var(--ic-eye)}
+  .sn a[href="#agencies"]{--ic:var(--ic-users)}
+  /* 子项没有图标，缩进到和上面的标签对齐（图标 19 + 间距 11 + 内边距 12） */
+  .sn-s{font-size:13.5px;padding:6px 12px 6px 42px;color:var(--ink-2)}
+  .sn-s:hover,.sn-h:hover{color:var(--ink)}
+  .sn-cap{font-size:12.5px;color:var(--faint);padding:10px 12px 2px}
+  .sn-aux .sn-s{padding-left:42px}
+  .sn b{font-size:12.5px;color:var(--faint);font-weight:500}
+  .sn-h b{color:var(--faint)}
+  .side-foot{border-top:1px solid var(--line);padding-top:12px;gap:8px}
+  .sn-x{
+    display:flex;align-items:center;gap:11px;font-size:13.5px;color:var(--ink-2);
+    padding:8px 12px;border-radius:999px;
+  }
+  .sn-x::before{
+    content:"";width:19px;height:19px;flex:0 0 auto;background:currentColor;opacity:.8;
+    -webkit-mask:var(--ic-box) center/contain no-repeat;mask:var(--ic-box) center/contain no-repeat;
+  }
+  .sn-x:hover{background:var(--surface);color:var(--ink)}
+
+  @media (min-width:1180px){
+    body{padding-left:272px}
+    .side{width:272px;padding:22px 14px 18px}
+    .wrap{max-width:1240px;padding-top:36px}
+  }
+  /* 窄屏塌成顶部横条：图标在这里只会挤，全部收起来。
+     两条硬要求：①导航文字绝不许折成两行（可点的东西折行＝点不准）；
+     ②标签不许被 flex 拉伸——style.css 的 .sn-h span{flex:1 1 auto} 在横条里
+     会把「今天要投的工作」和它的计数撑到两头，看着像两个东西。 */
+  @media (max-width:1179px){
+    .side{padding:10px 14px;gap:4px 10px}
+    .side-brand{padding:0}
+    .sn a{padding:4px 8px;gap:6px}
+    .sn-h{font-size:14px}
+    .sn-h span,.sn-s,.sn-x,.sn-h{white-space:nowrap}
+    .sn-h span{flex:0 0 auto}
+    .sn b{margin-left:4px}
+    .sn-h::before,.sn-x::before{display:none}
+    .sn-s,.sn-aux .sn-s{padding:4px 8px}
+    .sn-cap{padding:0 4px}
+    .side-foot{border-top:none;padding-top:0}
+    .sn-x{padding:4px 8px}
+  }
+
+  /* ---------- 其余零件对齐语汇 ---------- */
+  .ledger-hd{background:var(--surface)}
+  .lg-grp{color:var(--faint);letter-spacing:0;text-transform:none}
+  .lg-stage,.vz-st{background:var(--pill);border:1px solid var(--line);font-size:12px;padding:3px 10px}
+  .trk-hd h3{font-weight:600}
+  .q .qq{font-weight:600}
+  details.arch>summary,details.ablk>summary{border-radius:var(--r-md)}
+  footer{border-top:1px solid var(--line)}

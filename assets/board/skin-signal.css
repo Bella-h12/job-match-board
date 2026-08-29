@@ -1,0 +1,139 @@
+  /* ============================================================
+     UAE 求职作战板 · Signal 皮肤（2026-08-13 换皮）
+     取自 zarazhangrui/beautiful-html-templates 的 templates/signal/design.md
+     ——「情报简报」体：海军蓝 / 米纸 双底色，古金 #C8A870 是唯一的热色，
+     只用在细线、数字、kicker 上，绝不做底色、绝不上正文。
+     结构和内容一个字没动，只换了这一层 token + 下面那节字体/圆角。
+     偏离原设计的地方（连同理由）记在本文件末尾的「与 design.md 的出入」。
+     ============================================================ */
+  :root{
+    /* Dark（默认）= Signal 的 navy 面 */
+    --bg:#1C2644;
+    --surface:#232F55;
+    --surface-2:#2A3763;
+    --ink:#E2DCD0;          /* text-warm：绝不用纯白，这是它跟纸张调性的连接点 */
+    --ink-2:#8A96A8;
+    --faint:#4E5A6E;
+    --line:#2E3D5C;
+    --line-strong:#3E4F73;
+    --accent:#C8A870;       /* antique gold */
+    --accent-soft:rgba(200,168,112,.10);
+    /* Signal 本体没有语义色（它不需要状态）。这三个是看板的功能色，
+       按它的调性压低饱和度，并把 warn 推向橙侧，免得跟古金撞。 */
+    --good:#7E9B6B;
+    --warn:#CE8A45;
+    --bad:#C05B4A;
+    --good-bg:rgba(126,155,107,.12);
+    --warn-bg:rgba(206,138,69,.12);
+    --bad-bg:rgba(192,91,74,.12);
+    --gold:var(--accent);
+    --gold-soft:var(--accent-soft);
+    /* Signal 是 flat + hairline，明令不许圆角 */
+    --r-sm:0px; --r-md:0px; --r-lg:0px;
+    /* 字体：Artifact 的 CSP 挡掉一切外部字体，Source Serif 4 / DM Sans /
+       IBM Plex Mono 都下载不了，改用同调性的系统字，中文各自配对。 */
+    --serif:"Iowan Old Style","Source Serif 4",Georgia,"Songti SC","Noto Serif CJK SC","Source Han Serif SC",serif;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","DM Sans","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;
+    --mono:ui-monospace,"SF Mono","IBM Plex Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#F0ECE3; --surface:#F7F5EF; --surface-2:#E6E0D4;
+      --ink:#1A2030; --ink-2:#5A6270; --faint:#9AA0A8;
+      --line:#CAC4B4; --line-strong:#B3AB98;
+      --accent:#8A6A2E; --accent-soft:rgba(138,106,46,.10);
+      --good:#4C6B45; --warn:#96682A; --bad:#9E3F32;
+      --good-bg:rgba(76,107,69,.10); --warn-bg:rgba(150,104,42,.10); --bad-bg:rgba(158,63,50,.10);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F0ECE3; --surface:#F7F5EF; --surface-2:#E6E0D4;
+    --ink:#1A2030; --ink-2:#5A6270; --faint:#9AA0A8;
+    --line:#CAC4B4; --line-strong:#B3AB98;
+    --accent:#8A6A2E; --accent-soft:rgba(138,106,46,.10);
+    --good:#4C6B45; --warn:#96682A; --bad:#9E3F32;
+    --good-bg:rgba(76,107,69,.10); --warn-bg:rgba(150,104,42,.10); --bad-bg:rgba(158,63,50,.10);
+  }
+  :root[data-theme="dark"]{
+    --bg:#1C2644; --surface:#232F55; --surface-2:#2A3763;
+    --ink:#E2DCD0; --ink-2:#8A96A8; --faint:#4E5A6E;
+    --line:#2E3D5C; --line-strong:#3E4F73;
+    --accent:#C8A870; --accent-soft:rgba(200,168,112,.10);
+    --good:#7E9B6B; --warn:#CE8A45; --bad:#C05B4A;
+    --good-bg:rgba(126,155,107,.12); --warn-bg:rgba(206,138,69,.12); --bad-bg:rgba(192,91,74,.12);
+  }
+  /* ============================================================
+     Signal 皮肤 · 元件层（2026-08-13）
+     只动字体族 / 字重 / 字距 / 颜色角色，不动任何盒模型与结构。
+     ============================================================ */
+
+  /* 1 · 衬线领标题，无衬线撑正文——这条分工是 Signal 的结构性规则 */
+  h2,.part h2,.grp-t,.jc-co,.t10co,.lg-t,.trk-hd h3,h3,.q .qq{
+    font-family:var(--serif);
+    font-weight:600;
+    letter-spacing:-.01em;
+  }
+  .part h2,h2{font-weight:600;letter-spacing:-.015em}
+
+  /* 2 · kicker 一律 mono 大写古金，字距 ≥.14em——mono 靠字距才读得出编辑感 */
+  /* 只有每块的「第一个 b」才是 kicker 标签；正文引文里的 <b> 不能碰——
+     首版没写 :first-child，把 JD 原文「Experienced in banking, insurance…」
+     整段大写成了喊话，截图里一眼看出来的。 */
+  .part-no,.col h4,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked,.jc-gate b:first-child,.msg .lbl{
+    letter-spacing:.14em;
+    text-transform:uppercase;
+  }
+  .part-no,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked{color:var(--accent)}
+  .grp-badge{letter-spacing:.12em}
+
+  /* 3 · 统计数字＝衬线古金。优先级分是本页的「stat」时刻 */
+  .jc-score b,.t10sc b{
+    font-family:var(--serif);
+    font-weight:600;
+    letter-spacing:-.02em;
+    color:var(--accent);
+  }
+  .jc-calc em{color:var(--accent)}
+
+  /* 4 · 正文里的强调不再靠加粗提亮，收回成暖墨色，把注意力让给古金 */
+  .jc-why b,.jc-gate b:not(:first-child),.col p b,.lg-row p b:not(:first-child){
+    font-weight:600;color:var(--ink);
+  }
+
+  /* 5 · 项目符号换成 mono 古金的破折号；圆点会破坏编辑体 */
+  .arch-in ul,.lg-gaps ul{list-style:none;padding-left:0}
+  .arch-in li,.lg-gaps li{position:relative;padding-left:18px}
+  .arch-in li::before,.lg-gaps li::before{
+    content:"—";position:absolute;left:0;top:0;
+    font-family:var(--mono);color:var(--accent);opacity:.75;
+  }
+
+  /* 6 · 暗色面铺 80px 网格纹理——这是 Signal 的指纹，只在暗底出现 */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:linear-gradient(to right,var(--line) 1px,transparent 1px),
+                     linear-gradient(to bottom,var(--line) 1px,transparent 1px);
+    background-size:80px 80px;
+    opacity:.28;
+  }
+  @media (prefers-color-scheme: light){:root:not([data-theme="dark"]) body::before{opacity:.16}}
+  :root[data-theme="light"] body::before{opacity:.16}
+  .wrap{position:relative;z-index:1}
+
+  /* 7 · 遗留 bug：--rule 这个变量从来没定义过，border-left-color 一直掉回 currentColor */
+  .qsrc{border-left-color:var(--line-strong)}
+
+  /* ============================================================
+     与 signal/design.md 的出入（明写，别让以后的人以为是漏做）
+     1 · 字体全部换成系统字：Artifact 的 CSP 禁止外部请求，Source Serif 4 /
+         DM Sans / IBM Plex Mono 都拉不下来。取的是同调性替身，中文另配
+         宋体 / 苹方。字形不同，字重、字距、衬线-无衬线的分工照搬。
+     2 · 补了三个语义色：Signal 本体没有状态色（幻灯片不需要），而看板的
+         🟢🟡🔴 是功能。按它的饱和度压低，warn 推到橙侧免得跟古金撞。
+     3 · 不遵守「一屏内容不超过一半」：那是幻灯片的留白规则，看板是密集
+         信息页，遵守它等于把页面拉长三倍。padding 也保留原值没改成 7.5vw。
+     4 · 没做「正文不许加粗，改用斜体金 em」：那要动正文标签，这轮只换皮。
+     5 · 字号刻度整体压到网页尺度（原文 display 是 clamp(82px…180px)，
+         一屏一句话）。配色 / 圆角 / 细线 / kicker 字距是原样照搬的。
+     ============================================================ */
+

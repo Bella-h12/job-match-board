@@ -1,0 +1,74 @@
+  /* ============================================================
+     皮肤 · Monochrome（Ivory Ledger）
+     源：design-md/monochrome.md（zarazhangrui/beautiful-html-templates）
+     原文自述「黑墨印在米黄纸上的文献体：独立研究报告、学术专著」。
+     **一个彩色都没有** —— 所谓 accent 就是「更深的墨」。标题走极细几何无衬线
+     （Jost 200-300），chrome 走等宽。整套的气质是安静、密、像印出来的东西。
+     出入：①字体系统替身；②补三个语义色 —— 原文零彩色，但看板的 🟢🟡🔴 是功能，
+     不能没有；取最低饱和度、只上边框和文字，不铺底色。
+     ============================================================ */
+  :root{
+    --bg:#FAFADF;
+    --surface:#F5F0E4;
+    --surface-2:#F0F0D4;
+    --ink:#1A1A16;
+    --ink-2:#5E5E54;
+    --faint:#8A8A80;
+    --line:rgba(26,26,22,.16);
+    --line-strong:rgba(26,26,22,.34);
+    --accent:#1A1A16;
+    --accent-soft:rgba(26,26,22,.05);
+    --good:#4A6247;
+    --warn:#8A6A22;
+    --bad:#8E3B30;
+    --good-bg:rgba(74,98,71,.07);
+    --warn-bg:rgba(138,106,34,.07);
+    --bad-bg:rgba(142,59,48,.06);
+    --gold:var(--accent);
+    --gold-soft:var(--accent-soft);
+    --r-sm:0px; --r-md:0px; --r-lg:0px;
+    --serif:"Lora",Georgia,"Songti SC",serif;
+    --font:"Jost","Avenir Next","Century Gothic",-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#16160F; --surface:#1E1E16; --surface-2:#26261C;
+      --ink:#EDEDD8; --ink-2:#A6A697; --faint:#6E6E63;
+      --line:rgba(237,237,216,.14); --line-strong:rgba(237,237,216,.30);
+      --accent:#EDEDD8; --accent-soft:rgba(237,237,216,.06);
+      --good:#8FA98B; --warn:#C7A857; --bad:#C97F72;
+      --good-bg:rgba(143,169,139,.09); --warn-bg:rgba(199,168,87,.09); --bad-bg:rgba(201,127,114,.09);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#16160F; --surface:#1E1E16; --surface-2:#26261C;
+    --ink:#EDEDD8; --ink-2:#A6A697; --faint:#6E6E63;
+    --line:rgba(237,237,216,.14); --line-strong:rgba(237,237,216,.30);
+    --accent:#EDEDD8; --accent-soft:rgba(237,237,216,.06);
+    --good:#8FA98B; --warn:#C7A857; --bad:#C97F72;
+    --good-bg:rgba(143,169,139,.09); --warn-bg:rgba(199,168,87,.09); --bad-bg:rgba(201,127,114,.09);
+  }
+  :root[data-theme="light"]{
+    --bg:#FAFADF; --surface:#F5F0E4; --surface-2:#F0F0D4;
+    --ink:#1A1A16; --ink-2:#5E5E54; --faint:#8A8A80;
+    --line:rgba(26,26,22,.16); --line-strong:rgba(26,26,22,.34);
+    --accent:#1A1A16; --accent-soft:rgba(26,26,22,.05);
+    --good:#4A6247; --warn:#8A6A22; --bad:#8E3B30;
+    --good-bg:rgba(74,98,71,.07); --warn-bg:rgba(138,106,34,.07); --bad-bg:rgba(142,59,48,.06);
+  }
+
+  /* 元件层：标题极细 + 放开字距（这是这套的全部性格所在，字重一重就不是它了）。
+     数字反过来用等宽，跟极细标题形成对比。 */
+  .part h2,h2,.side-brand{font-family:var(--font);font-weight:300;letter-spacing:.01em}
+  h3,.grp-t,.jc-co,.t10co,.lg-t,.trk-hd h3,.q .qq,.vz-t{
+    font-family:var(--font);font-weight:500;letter-spacing:0;
+  }
+  .jc-score b,.t10sc b,.t10calc b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+  .part-no,.col h4,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked,.jc-gate b:first-child,.msg .lbl{
+    letter-spacing:.16em;text-transform:uppercase;
+  }
+  .part-no,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked{color:var(--ink-2)}
+  /* 引文走 Lora 斜体 —— 原文里这是唯一一处衬线，用来标「这是别人说的话」 */
+  .jc-gate,.msg,.qsrc{font-family:var(--serif);font-style:italic}
+  .jc-gate b:first-child,.msg .lbl{font-family:var(--mono);font-style:normal}

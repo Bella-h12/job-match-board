@@ -1,0 +1,125 @@
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+  /* ============================================================
+     皮肤 · Acid Paper（2026-08-19）· token 层
+     Hallmark · studied-DNA（source: image ×3 —— Linktree / Mailchimp / hilos）
+     macrostructure: 沿用现有（换皮不动结构）· nav: N3 侧栏 / 窄屏 N5 浮动胶囊
+     pre-emit critique: P5 H5 E4 S5 R4 V5
+
+     三张参考图的共同 DNA，逐条落成规则：
+       ① 一整块高饱和平涂色场当第一屏（Linktree 的酸绿 hero）→ .today 整块柠檬
+       ② 卡片是「白纸 + 近黑描边 + 硬投影」，没有柔和阴影（hilos / neobrutalist）
+       ③ 大标题走高对比衬线、字重 400、字号极大（hilos 的 "Your team and agents…"）
+       ④ 能点的东西一律胶囊形（三张图都是）
+       ⑤ 纸感：底色不是纯白，是暖灰米；再压一层极淡的点阵网格当纸纹
+     色值取自 design-md/neo-grid-bold.md（putty #ECECE8 / ink #0A0A0A / lemon #E6FF3D），
+     那套的原生体裁就是「高密度编辑版式 + 单一霓虹色」，跟这块板的密度对得上。
+
+     和 blue / mindtrip 的根本差别：
+       - blue：钴蓝是**文字色**，强调＝更蓝。
+       - mindtrip：没有品牌色，强调＝更黑更重。
+       - acid：柠檬**只做色块、绝不做文字色**（在任何底色上都读不动），
+         所以 --accent 是墨黑（文字强调），柠檬走 --pop（面）。
+         语义三色（能投绿 / 存疑黄 / 挡红）跟柠檬不抢——柠檬回答「先看这里」，
+         语义色回答「这条能不能投」，两套信号不同源，不能混。
+     配套：skin-acid.after.css（元件层，必须拼在 style.css **之后**，
+     因为要盖掉 style.css 已经写死的 border / background / font-size）。
+     ============================================================ */
+  :root{
+    --bg:#EDECE5;
+    --surface:#FBFAF4;
+    --surface-2:#E5E4DA;
+    --ink:#0A0A0A;
+    --ink-2:#4E4E46;
+    --faint:#8A8A82;
+    --line:rgba(10,10,10,.16);
+    --line-strong:#0A0A0A;
+    --accent:#0A0A0A;
+    --accent-soft:#F4FFC6;
+    /* 柠檬：只做面，永远配 --pop-ink 当文字色（两种模式下都是墨黑） */
+    --pop:#E6FF3D;
+    --pop-ink:#0A0A0A;
+    --pop-line:rgba(10,10,10,.30);
+    /* 纸纹点阵 */
+    --dot:rgba(10,10,10,.06);
+    /* 卡片描边／硬投影：投影只在浅色下成立，深色下关掉（黑纸上打黑影＝看不见，
+       打浅色影＝整页发亮）。所以做成 token，不在元件层写死。 */
+    --card-line:#0A0A0A;
+    --card-shadow:3px 3px 0 rgba(10,10,10,.90);
+    --card-shadow-lg:5px 5px 0 #0A0A0A;
+    --card-lift:5px 5px 0 rgba(10,10,10,.28);
+    /* 第一屏那块色场：浅色下是柠檬平涂，深色下换成墨块 + 柠檬描边。
+       深色下不铺柠檬是故意的——半屏高饱和在暗环境里是刺眼，不是品牌。 */
+    --hero-bg:#E6FF3D;
+    --hero-ink:#0A0A0A;
+    --hero-ink2:rgba(10,10,10,.74);
+    --hero-faint:rgba(10,10,10,.56);
+    --hero-line:rgba(10,10,10,.26);
+    --hero-strong:#0A0A0A;
+    --hero-card:#FFFEF7;
+    --hero-shadow:6px 6px 0 #0A0A0A;
+    --good:#0B6B3A;
+    --warn:#8A4B00;
+    --bad:#B3261E;
+    --good-bg:#DCF2E3;
+    --warn-bg:#F8EBD6;
+    --bad-bg:#FAE5E2;
+    --gold:var(--accent);
+    --gold-soft:var(--accent-soft);
+    --r-sm:9px; --r-md:14px; --r-lg:22px;
+    /* 衬线只承担 display（大标题 + 大数字 + 站名）。Instrument Serif 只有 400，
+       所以标题靠字号扛层级、不靠字重——这正是 hilos 那张图的做法。
+       中文没有对应的 webfont（太重，不下），落到系统宋体；两支都是高对比，
+       并排不打架。字体加载失败时 Georgia / 宋体照样成立。 */
+    --serif:"Instrument Serif","Songti SC","Noto Serif SC",Georgia,"Times New Roman",serif;
+    --font:"Space Grotesk",-apple-system,BlinkMacSystemFont,"Inter","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;
+    --mono:ui-monospace,"SF Mono","IBM Plex Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15150E; --surface:#1E1E15; --surface-2:#2B2B1E;
+      --ink:#F4F3E8; --ink-2:#B2B0A0; --faint:#7A786D;
+      --line:rgba(244,243,232,.15); --line-strong:rgba(244,243,232,.55);
+      --accent:#F4F3E8; --accent-soft:#333A0E;
+      --pop:#E6FF3D; --pop-ink:#0A0A0A; --pop-line:rgba(10,10,10,.30);
+      --dot:rgba(244,243,232,.055);
+      --card-line:rgba(244,243,232,.28);
+      --card-shadow:none; --card-shadow-lg:none; --card-lift:none;
+      --hero-bg:#101009; --hero-ink:#F4F3E8; --hero-ink2:#B2B0A0;
+      --hero-faint:#7A786D; --hero-line:rgba(244,243,232,.24);
+      --hero-strong:#E6FF3D; --hero-card:#1E1E15; --hero-shadow:none;
+      --good:#5FD79B; --warn:#E9B24E; --bad:#F0897C;
+      --good-bg:rgba(95,215,155,.12); --warn-bg:rgba(233,178,78,.12); --bad-bg:rgba(240,137,124,.12);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15150E; --surface:#1E1E15; --surface-2:#2B2B1E;
+    --ink:#F4F3E8; --ink-2:#B2B0A0; --faint:#7A786D;
+    --line:rgba(244,243,232,.15); --line-strong:rgba(244,243,232,.55);
+    --accent:#F4F3E8; --accent-soft:#333A0E;
+    --pop:#E6FF3D; --pop-ink:#0A0A0A; --pop-line:rgba(10,10,10,.30);
+    --dot:rgba(244,243,232,.055);
+    --card-line:rgba(244,243,232,.28);
+    --card-shadow:none; --card-shadow-lg:none; --card-lift:none;
+    --hero-bg:#101009; --hero-ink:#F4F3E8; --hero-ink2:#B2B0A0;
+    --hero-faint:#7A786D; --hero-line:rgba(244,243,232,.24);
+    --hero-strong:#E6FF3D; --hero-card:#1E1E15; --hero-shadow:none;
+    --good:#5FD79B; --warn:#E9B24E; --bad:#F0897C;
+    --good-bg:rgba(95,215,155,.12); --warn-bg:rgba(233,178,78,.12); --bad-bg:rgba(240,137,124,.12);
+  }
+  :root[data-theme="light"]{
+    --bg:#EDECE5; --surface:#FBFAF4; --surface-2:#E5E4DA;
+    --ink:#0A0A0A; --ink-2:#4E4E46; --faint:#8A8A82;
+    --line:rgba(10,10,10,.16); --line-strong:#0A0A0A;
+    --accent:#0A0A0A; --accent-soft:#F4FFC6;
+    --pop:#E6FF3D; --pop-ink:#0A0A0A; --pop-line:rgba(10,10,10,.30);
+    --dot:rgba(10,10,10,.06);
+    --card-line:#0A0A0A;
+    --card-shadow:3px 3px 0 rgba(10,10,10,.90);
+    --card-shadow-lg:5px 5px 0 #0A0A0A;
+    --card-lift:5px 5px 0 rgba(10,10,10,.28);
+    --hero-bg:#E6FF3D; --hero-ink:#0A0A0A; --hero-ink2:rgba(10,10,10,.74);
+    --hero-faint:rgba(10,10,10,.56); --hero-line:rgba(10,10,10,.26);
+    --hero-strong:#0A0A0A; --hero-card:#FFFEF7; --hero-shadow:6px 6px 0 #0A0A0A;
+    --good:#0B6B3A; --warn:#8A4B00; --bad:#B3261E;
+    --good-bg:#DCF2E3; --warn-bg:#F8EBD6; --bad-bg:#FAE5E2;
+  }

@@ -66,6 +66,10 @@ TITLE_RX = [
     (r"founder|co[- ]?founder", "founder"),
     (r"designer|设计师", "designer"),
     (r"增长|growth (?:manager|lead|analyst)", "growth"),
+    (r"(?:qa|test|quality)\s*(?:engineer|analyst|automation)|测试工程师|自动化测试|质量工程师", "qa engineer"),
+    (r"marketing|市场|营销", "marketing"),
+    (r"sales|销售|商务拓展|\bBD\b", "sales"),
+    (r"project manager|项目经理|delivery manager", "project manager"),
     (r"运营(?!商)|operations? (?:manager|analyst|specialist)", "operations"),
 ]
 # 中文职位名并进上面那张表（同一个键，正则里用 | 连起来）
@@ -80,8 +84,11 @@ RANGE = re.compile(r"(?:(%s)\w*\s+)?(\d{4})\s*[–\-—~至]+\s*(?:(%s)\w*\s+)?(
 # 中文/点号式：2024.03 - 2026.04 · 2024年3月-2026年4月 · 2024/03-至今
 # ⚠ 这条是拿真简历跑出来才补的：第一版只认英文月份，中文简历整份日期一条都没认出来，
 # 总年限直接变成 None（2026-08-27 实测，陈若龙那份 6 年经验被算成 0）。
-RANGE_CN = re.compile(r"(\d{4})\s*[./年]\s*(\d{1,2})?\s*月?\s*[–\-—~至]+\s*"
-                      r"(?:(\d{4})\s*[./年]\s*(\d{1,2})?\s*月?|至今|now|present)", re.I)
+# ⚠ 「至今」要先于分隔符判：分隔符类里含「至」，会把「至今」的「至」吃掉、只剩「今」，
+# 于是「2025.09 至今」整条不匹配（实测一份简历最近那段工作因此没被算进年限）。
+RANGE_CN = re.compile(r"(\d{4})\s*[./年]\s*(\d{1,2})?\s*月?\s*"
+                      r"(?:至今|now|present|[–\-—~至到]+\s*(?:至今|now|present|"
+                      r"(\d{4})\s*[./年]\s*(\d{1,2})?\s*月?))", re.I)
 MIDX = {m: i + 1 for i, m in enumerate("jan feb mar apr may jun jul aug sep oct nov dec".split())}
 
 
@@ -119,7 +126,8 @@ def main():
 
     # ---- 年限：按「同一行里既有 title 又有日期区间」来算专项 ----
     spans = []           # (title 或 None, 月数)
-    for line in raw.split("\n"):
+    lines = raw.split("\n")
+    for idx, line in enumerate(lines):
         m = RANGE.search(line)
         mc = RANGE_CN.search(line)
         if not m and not mc:
@@ -140,19 +148,38 @@ def main():
         mo = months_between(sy, m1, y2, m2)
         if mo <= 0 or mo > 600:
             continue
+        # ⚠ 2026-08-28：职位名和日期**常常不在同一行**（实测一份测试工程师简历，
+        # 「网易popo — 自动化测试工程师(派驻)」在上一行、「2025.09 至今」在下一行），
+        # 只看本行会让每一段的 title 都是 None，专项年限整个变成空的。往回看两行。
+        ctx = " ".join(lines[max(0, idx - 2): idx + 1])
         title = None
         for rx, name in TITLE_RX:
-            if re.search(rx, line, re.I):
+            if re.search(rx, ctx, re.I):
                 title = name
                 break
-        spans.append((title, mo, line.strip()[:90]))
+        spans.append((title, mo, sy, m1, y2, m2, line.strip()[:90]))
     # 学历段要排除（它们也是日期区间，但不是工作年限）
-    spans = [s for s in spans if not re.search(r"university|bachelor|\bbsc\b|\bmsc\b|master|degree|大学|学院", s[2], re.I)]
-    total = round(sum(s[1] for s in spans) / 12, 1) if spans else None
+    spans = [s for s in spans if not re.search(r"university|bachelor|\bbsc\b|\bmsc\b|master|degree|大学|学院", s[6], re.I)]
+
+    # ⚠ 2026-08-28：**区间重叠不能相加**。实测那份简历里
+    # 「服务端测试(2023.06 — 2024.03)」和「客户端测试(2021.07 — 2023.06)」
+    # 是「2021.07 — 2024.03」那一段的两个子区间，三段一加总年限虚高到 6.7 年。
+    # 正解：把区间并起来再量长度（同一段时间只算一次）。
+    def merge_months(items):
+        iv = sorted((sy * 12 + m1, y2 * 12 + m2) for _, _, sy, m1, y2, m2, _ in items)
+        out = []
+        for a, b in iv:
+            if out and a <= out[-1][1]:
+                out[-1][1] = max(out[-1][1], b)
+            else:
+                out.append([a, b])
+        return sum(b - a for a, b in out)
+
+    total = round(merge_months(spans) / 12, 1) if spans else None
     title_years = {}
     for rx, name in TITLE_RX:
-        mo = sum(s[1] for s in spans if s[0] == name)
-        title_years[rx] = round(mo / 12, 1)
+        sub = [s for s in spans if s[0] == name]
+        title_years[rx] = round(merge_months(sub) / 12, 1) if sub else 0.0
 
     # ---- 能力：清单逐项找证据 ----
     has, lacks, evidence = [], [], {}
@@ -168,7 +195,7 @@ def main():
                years_total=total, title_years=title_years,
                has=has, lacks=lacks, partial=PARTIAL,
                _evidence=evidence,
-               _spans=[dict(title=t, years=round(mo / 12, 1), line=l) for t, mo, l in spans],
+               _spans=[dict(title=t, years=round(mo / 12, 1), line=l) for t, mo, _, _, _, _, l in spans],
                _note="confirmed 改成 true 之前不会出分。请逐条核 title_years 和 lacks——"
                      "lacks 的意思是「这份简历里没找到」，不是「他一定没有」。")
     os.makedirs(outdir, exist_ok=True)

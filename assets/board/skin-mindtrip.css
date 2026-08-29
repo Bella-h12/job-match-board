@@ -1,0 +1,80 @@
+  /* ============================================================
+     皮肤 · Mindtrip（2026-08-19）
+     源：design-md/mindtrip.md —— DNA 抽自 Bella 提供的一张 Mindtrip 截图，
+     只取结构与配色语汇（灰盘 + 实底无描边卡 + 图标导航 + 胶囊控件 + 单一无衬线），
+     不复制像素、不复制文案、不复制图片。
+     和 blue / signal 的根本差别：**这套没有品牌色**。层级由字号 / 字重 /
+     「白底 ↔ 灰底」反转承担，彩色只留给语义（可投 / 存疑 / 挡）。
+     所以 --accent 被定义成墨黑：页面上一切「强调」＝更黑更重，不是更蓝。
+     配套：skin-mindtrip.after.css（元件层，装在 style.css 之后）。
+     ============================================================ */
+  :root{
+    --bg:#FFFFFF;
+    --surface:#F4F4F5;
+    --surface-2:#EAEAEC;
+    --pill:#FFFFFF;
+    --ink:#16181C;
+    --ink-2:#5B6068;
+    --faint:#8B9099;
+    --line:#E5E6E8;
+    --line-strong:#D2D4D8;
+    /* 墨黑当 accent：Mindtrip 全站唯一的彩色面是侧栏那张薄荷卡，
+       其余全部靠灰阶。--accent-soft 因此是灰不是彩。 */
+    --accent:#16181C;
+    --accent-soft:#EAEAEC;
+    /* 语义三色：从截图那块薄荷绿取绿，另两个按同样的低饱和度配齐 */
+    --good:#0E7A56;
+    --warn:#8A5A00;
+    --bad:#BE3A2B;
+    --good-bg:#DDF3E7;
+    --warn-bg:#F6EFDF;
+    --bad-bg:#FAEAE7;
+    --gold:var(--accent);
+    --gold-soft:var(--accent-soft);
+    --r-sm:10px; --r-md:14px; --r-lg:20px;
+    /* 单一字族：--mono 和 --serif 都指回它。截图里没有等宽字，也没有衬线。
+       数字靠 font-variant-numeric:tabular-nums 对齐（在 after 层统一开）。 */
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Helvetica Neue","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;
+    --mono:var(--font);
+    --serif:var(--font);
+
+    /* 图标（描边式，19px）。用 mask 上色＝跟着 currentColor 走，
+       深色档不用另配一套。DOM 一个字都没动，图标只活在皮肤层。 */
+    --ic-send:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 2 11 13'/%3E%3Cpath d='M22 2 15 22l-4-9-9-4z'/%3E%3C/svg%3E");
+    --ic-clock:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5.2l3.2 1.9'/%3E%3C/svg%3E");
+    --ic-chat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");
+    --ic-award:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='9' r='6'/%3E%3Cpath d='M8.4 14.2 7 22l5-2.8 5 2.8-1.4-7.8'/%3E%3C/svg%3E");
+    --ic-x:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m15 9-6 6M9 9l6 6'/%3E%3C/svg%3E");
+    --ic-eye:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+    --ic-users:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3C/svg%3E");
+    --ic-box:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='4' rx='1'/%3E%3Cpath d='M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8'/%3E%3Cpath d='M10 12h4'/%3E%3C/svg%3E");
+    --ic-spark:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M12 2.2 14.1 8.4 20.3 10.5 14.1 12.6 12 18.8 9.9 12.6 3.7 10.5 9.9 8.4z'/%3E%3C/svg%3E");
+  }
+  /* 深色档：同一套语汇的等价映射（原设计只有浅色）。
+     本地截图验收和 gate 都会跑 prefers-color-scheme:dark，缺了它会掉回上一套皮的值。 */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0C0D0F; --surface:#17191C; --surface-2:#212429; --pill:#212429;
+      --ink:#F2F3F5; --ink-2:#A2A7AF; --faint:#767C86;
+      --line:#26292E; --line-strong:#383C43;
+      --accent:#F2F3F5; --accent-soft:#212429;
+      --good:#4ECFA0; --warn:#E0B057; --bad:#F08878;
+      --good-bg:#12291F; --warn-bg:#2A2313; --bad-bg:#2C1A17;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0C0D0F; --surface:#17191C; --surface-2:#212429; --pill:#212429;
+    --ink:#F2F3F5; --ink-2:#A2A7AF; --faint:#767C86;
+    --line:#26292E; --line-strong:#383C43;
+    --accent:#F2F3F5; --accent-soft:#212429;
+    --good:#4ECFA0; --warn:#E0B057; --bad:#F08878;
+    --good-bg:#12291F; --warn-bg:#2A2313; --bad-bg:#2C1A17;
+  }
+  :root[data-theme="light"]{
+    --bg:#FFFFFF; --surface:#F4F4F5; --surface-2:#EAEAEC; --pill:#FFFFFF;
+    --ink:#16181C; --ink-2:#5B6068; --faint:#8B9099;
+    --line:#E5E6E8; --line-strong:#D2D4D8;
+    --accent:#16181C; --accent-soft:#EAEAEC;
+    --good:#0E7A56; --warn:#8A5A00; --bad:#BE3A2B;
+    --good-bg:#DDF3E7; --warn-bg:#F6EFDF; --bad-bg:#FAEAE7;
+  }

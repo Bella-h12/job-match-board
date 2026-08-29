@@ -1,0 +1,76 @@
+  /* ============================================================
+     皮肤 · Blue Professional
+     源：design-md/blue-professional.md（zarazhangrui/beautiful-html-templates）
+     原文自述「投研报告 / 咨询季度简报 / 金融看板：密而不挤」——这是三套里
+     唯一一套的原生体裁就是数据密集页的。暖米底 #fdfae7 + 单一钴蓝 #1e2bfa，
+     卡片是 4% 钴蓝的浅底 + 半透明描边，圆角 10-14px，全程无衬线。
+     出入：字体走系统替身（CSP 禁外部字体）；补三个语义色（原文只有 positive/negative）。
+     ============================================================ */
+  :root{
+    --bg:#FDFAE7;
+    --surface:#FFFDF3;
+    --surface-2:rgba(30,43,250,.06);
+    --ink:#111111;
+    --ink-2:#6B6B6B;
+    --faint:#9A9A9A;
+    --line:rgba(30,43,250,.20);
+    --line-strong:rgba(30,43,250,.34);
+    --accent:#1E2BFA;
+    --accent-soft:rgba(30,43,250,.07);
+    --good:#059669;
+    --warn:#B45309;
+    --bad:#DC2626;
+    --good-bg:rgba(5,150,105,.09);
+    --warn-bg:rgba(180,83,9,.09);
+    --bad-bg:rgba(220,38,38,.08);
+    --gold:var(--accent);
+    --gold-soft:var(--accent-soft);
+    --r-sm:6px; --r-md:10px; --r-lg:14px;
+    --serif:var(--font);
+    --font:"Space Grotesk","Avenir Next",-apple-system,BlinkMacSystemFont,"Inter","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;
+    --mono:ui-monospace,"SF Mono","IBM Plex Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0B0D1A; --surface:#12152A; --surface-2:rgba(122,134,255,.10);
+      --ink:#EEF0FF; --ink-2:#9BA0C4; --faint:#666B8C;
+      --line:rgba(122,134,255,.22); --line-strong:rgba(122,134,255,.38);
+      --accent:#7A86FF; --accent-soft:rgba(122,134,255,.10);
+      --good:#34D399; --warn:#FBBF24; --bad:#F87171;
+      --good-bg:rgba(52,211,153,.10); --warn-bg:rgba(251,191,36,.10); --bad-bg:rgba(248,113,113,.10);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0D1A; --surface:#12152A; --surface-2:rgba(122,134,255,.10);
+    --ink:#EEF0FF; --ink-2:#9BA0C4; --faint:#666B8C;
+    --line:rgba(122,134,255,.22); --line-strong:rgba(122,134,255,.38);
+    --accent:#7A86FF; --accent-soft:rgba(122,134,255,.10);
+    --good:#34D399; --warn:#FBBF24; --bad:#F87171;
+    --good-bg:rgba(52,211,153,.10); --warn-bg:rgba(251,191,36,.10); --bad-bg:rgba(248,113,113,.10);
+  }
+  :root[data-theme="light"]{
+    --bg:#FDFAE7; --surface:#FFFDF3; --surface-2:rgba(30,43,250,.06);
+    --ink:#111111; --ink-2:#6B6B6B; --faint:#9A9A9A;
+    --line:rgba(30,43,250,.20); --line-strong:rgba(30,43,250,.34);
+    --accent:#1E2BFA; --accent-soft:rgba(30,43,250,.07);
+    --good:#059669; --warn:#B45309; --bad:#DC2626;
+    --good-bg:rgba(5,150,105,.09); --warn-bg:rgba(180,83,9,.09); --bad-bg:rgba(220,38,38,.08);
+  }
+
+  /* 元件层：标题 Space Grotesk 700、字距收紧；数字也走标题字（原文：headline
+     和 numerical callouts 同一支字）；kicker 用 mono 大写钴蓝。 */
+  .part h2,h2,h3,.grp-t,.jc-co,.t10co,.lg-t,.trk-hd h3,.q .qq,.side-brand,.vz-t{
+    font-family:var(--font);font-weight:700;letter-spacing:-.02em;
+  }
+  .jc-score b,.t10sc b,.t10calc b{
+    font-family:var(--font);font-weight:700;letter-spacing:-.02em;color:var(--accent);
+  }
+  .part-no,.col h4,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked,.jc-gate b:first-child,.msg .lbl{
+    letter-spacing:.12em;text-transform:uppercase;
+  }
+  .part-no,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked{color:var(--accent)}
+  .jc,.ledger,.t10,.callout,.col,.qbox,.jc-gate,.gate,.msg,.chip,.grp-badge,.lg-stage,.vz-st{
+    border-radius:var(--r-md);
+  }
+  .chip,.grp-badge,.lg-stage,.vz-st{border-radius:var(--r-sm)}
+  .t10row.hot,.jc{background:var(--surface)}

@@ -1,0 +1,75 @@
+  /* ============================================================
+     皮肤 · Studio
+     源：design-md/studio.md（zarazhangrui/beautiful-html-templates）
+     原文自述「Boring Studios 那类设计工作室的提案：字重到了 900 就不再是字，
+     是形状」。配色是二元加一：近黑 #1C1C1C + 酸黄 #F5D200，零圆角零阴影零第二色。
+     出入：①字体系统替身；②**浅色面不敢用满屏酸黄**（原文的 light face 是整块
+     #F5D200 铺底，那是一页一句话的幻灯片才扛得住，密集文字页上会刺眼到读不下去），
+     改成骨白底 + 近黑字 + 压暗的黄当强调；③补三个语义色。
+     ============================================================ */
+  :root{
+    --bg:#F4F2EA;
+    --surface:#FFFFFF;
+    --surface-2:#EAE7DC;
+    --ink:#1C1C1C;
+    --ink-2:rgba(28,28,28,.62);
+    --faint:rgba(28,28,28,.35);
+    --line:rgba(28,28,28,.18);
+    --line-strong:rgba(28,28,28,.34);
+    --accent:#8A7500;
+    --accent-soft:rgba(245,210,0,.20);
+    --good:#3F6B3A;
+    --warn:#9A6608;
+    --bad:#A33326;
+    --good-bg:rgba(63,107,58,.09);
+    --warn-bg:rgba(154,102,8,.09);
+    --bad-bg:rgba(163,51,38,.08);
+    --gold:var(--accent);
+    --gold-soft:var(--accent-soft);
+    --r-sm:0px; --r-md:0px; --r-lg:0px;
+    --serif:var(--font);
+    --font:"Barlow",-apple-system,BlinkMacSystemFont,"Helvetica Neue","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1C1C1C; --surface:#242422; --surface-2:#2E2E2C;
+      --ink:#F5D200; --ink-2:rgba(245,210,0,.58); --faint:rgba(245,210,0,.32);
+      --line:#2E2E2C; --line-strong:#454540;
+      --accent:#F5D200; --accent-soft:rgba(245,210,0,.10);
+      --good:#9BBF5A; --warn:#F0A020; --bad:#E8604C;
+      --good-bg:rgba(155,191,90,.10); --warn-bg:rgba(240,160,32,.10); --bad-bg:rgba(232,96,76,.10);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1C1C1C; --surface:#242422; --surface-2:#2E2E2C;
+    --ink:#F5D200; --ink-2:rgba(245,210,0,.58); --faint:rgba(245,210,0,.32);
+    --line:#2E2E2C; --line-strong:#454540;
+    --accent:#F5D200; --accent-soft:rgba(245,210,0,.10);
+    --good:#9BBF5A; --warn:#F0A020; --bad:#E8604C;
+    --good-bg:rgba(155,191,90,.10); --warn-bg:rgba(240,160,32,.10); --bad-bg:rgba(232,96,76,.10);
+  }
+  :root[data-theme="light"]{
+    --bg:#F4F2EA; --surface:#FFFFFF; --surface-2:#EAE7DC;
+    --ink:#1C1C1C; --ink-2:rgba(28,28,28,.62); --faint:rgba(28,28,28,.35);
+    --line:rgba(28,28,28,.18); --line-strong:rgba(28,28,28,.34);
+    --accent:#8A7500; --accent-soft:rgba(245,210,0,.20);
+    --good:#3F6B3A; --warn:#9A6608; --bad:#A33326;
+    --good-bg:rgba(63,107,58,.09); --warn-bg:rgba(154,102,8,.09); --bad-bg:rgba(163,51,38,.08);
+  }
+
+  /* 元件层：标题重、大写、字距压到负；chrome 全 mono。 */
+  .part h2,h2,.side-brand{
+    font-family:var(--font);font-weight:800;letter-spacing:-.03em;text-transform:uppercase;
+  }
+  h3,.grp-t,.jc-co,.t10co,.lg-t,.trk-hd h3,.q .qq,.vz-t{
+    font-family:var(--font);font-weight:700;letter-spacing:-.015em;
+  }
+  .jc-score b,.t10sc b,.t10calc b{
+    font-family:var(--font);font-weight:800;letter-spacing:-.03em;color:var(--accent);
+  }
+  .part-no,.col h4,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked,.jc-gate b:first-child,.msg .lbl{
+    letter-spacing:.14em;text-transform:uppercase;
+  }
+  .part-no,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked{color:var(--accent)}
+  .grp-badge.new{background:var(--accent-soft)}

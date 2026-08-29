@@ -1,0 +1,146 @@
+  /* ============================================================
+     皮肤 · Acid Paper · 元件层（必须装在 style.css **之后**）
+     token 全部来自 skin-acid.css，这里一个色值都不写死（R17-1）。
+     六个动作，逐条对应三张参考图：
+       ① 第一屏整块柠檬色场，日期做成反色胶囊（Linktree hero）
+       ② 卡片＝白纸 + 近黑描边 + 硬投影，hover 是位移不是变色（neobrutalist / hilos）
+       ③ display 走高对比衬线、字重 400、字号大（hilos 标题）
+       ④ 能点的东西一律胶囊；静态元件保持方角——圆＝可按，是唯一信号
+       ⑤ 柠檬只标「先看这里」：今天新增 / 已投 ✓ / 悬停行，绝不进语义色的地盘
+       ⑥ 底纹：极淡点阵网格当纸纹（纯 CSS，无外链图）
+     ============================================================ */
+
+  /* ---------- ⑥ 纸纹 ---------- */
+  body{
+    background-color:var(--bg);
+    background-image:radial-gradient(var(--dot) 1px,transparent 1px);
+    background-size:22px 22px;
+    background-position:-1px -1px;
+  }
+
+  /* ---------- ③ display 层：衬线 + 400 + 大 ---------- */
+  .today-h,.part h2,h2,.rest-hd h2,.side-brand,.tc-score,.fn b,.t10sc b,.jc-score b,.trk-hd h3{
+    font-family:var(--serif);font-weight:400;
+  }
+  .today-h{font-size:58px;line-height:1.06;letter-spacing:-.005em;margin:0 0 30px}
+  .part h2,h2{font-size:30px;letter-spacing:-.005em;line-height:1.2}
+  .rest-hd h2{font-size:30px}
+  .trk-hd h3{font-size:21px}
+  /* 数字用衬线体，但对齐仍靠 tabular-nums */
+  .tc-score,.fn b,.t10sc b,.jc-score b,.jc-mini b,.tc-mini b,.hd-chip b,.lg-counts,
+  .t10rank,.jc-rank,.ablk-n,.sn b{font-variant-numeric:tabular-nums}
+  .tc-score{font-size:68px;letter-spacing:-.01em;color:var(--ink);margin-bottom:14px}
+  .fn b{font-size:36px;letter-spacing:-.01em}
+  .t10sc b{font-size:24px;letter-spacing:0}
+  .jc-score b{font-size:28px;letter-spacing:0}
+
+  /* mono 小标签保持全大写 + 字距：这是 neo-grid 那套的第二支声音，
+     跟大衬线形成对比节奏（不是装饰，是层级） */
+  .part-no,.col h4,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked,.msg .lbl,
+  .jc-gate b:first-child,.today-date,.t10sc small,.jc-score small{
+    font-family:var(--mono);text-transform:uppercase;letter-spacing:.10em;font-weight:500;
+  }
+  .part-no,.sub-h,.jc-reach-hd,.arch-in h4,.q .why-asked{color:var(--ink-2)}
+
+  /* ---------- ① 第一屏：整块柠檬色场 ---------- */
+  /* 局部重定义 token，让色场里的所有子元件自动跟着换语义色，
+     不用逐个改颜色（改一处 = 全部对） */
+  .today{
+    background:var(--hero-bg);color:var(--hero-ink);
+    border:1.6px solid var(--hero-strong);border-radius:28px;
+    box-shadow:var(--hero-shadow);
+    padding:34px 30px 28px;margin:6px 0 10px;
+    --ink:var(--hero-ink); --ink-2:var(--hero-ink2); --faint:var(--hero-faint);
+    /* --line-strong 跟 hero 描边分开：深色下 hero 描边是柠檬，但如果连
+       --line-strong 一起换成柠檬，色场里的 ✓ 圈和公司名下划线全会变成柠檬——
+       而柠檬是「已投」那个状态的颜色，未投的按钮长成已投的样子＝状态失明。 */
+    --line:var(--hero-line); --line-strong:var(--hero-ink); --accent:var(--hero-ink);
+    --surface:var(--hero-card);
+  }
+  /* 日期做成反色胶囊：色场上唯一的深色小块，眼睛第一站 */
+  .today-date{
+    display:inline-block;background:var(--hero-ink);color:var(--hero-bg);
+    padding:5px 13px 6px;border-radius:999px;font-size:11px;margin-bottom:18px;
+  }
+
+  /* ---------- ② 卡片：白纸 + 描边 + 硬投影 ---------- */
+  .tcard{
+    border:1.6px solid var(--card-line);border-radius:var(--r-lg);
+    box-shadow:var(--card-shadow-lg);padding:24px 24px 20px;
+    transition:transform .12s ease;
+  }
+  /* hover 是位移，不是描边变色——变色在柠檬底上看不出来 */
+  .tcard:hover{border-color:var(--card-line);transform:translate(-2px,-2px)}
+  .tc-why{font-weight:600}
+  .tc-ops{border-top-color:var(--line)}
+
+  /* 列表容器：描边收敛成近黑细线，投影只给最外层容器，不给每一行 */
+  .t10,.ledger,.trk,.post{border:1.4px solid var(--card-line);border-radius:var(--r-lg)}
+  .jc{border:1.2px solid var(--card-line);border-radius:var(--r-md)}
+  details.fold,.callout,.qbox,.col,.gate,.jc-gate,.msg,.hd-note>p{border-color:var(--line)}
+  .part,.rest-hd{border-top:1.5px solid var(--card-line)}
+  .funnel{border-top-color:var(--line)}
+
+  /* ---------- ④ 能点的＝胶囊 ---------- */
+  .chip,.grp-badge,.lg-stage,.vz-st,.act-s,.prospect,.hd-chip,.rtag,
+  .jc-more,.t10more,.skip-btn,.btn,.jc-act .act,.hd-note>summary{border-radius:999px}
+  .jc-more,.t10more,.skip-btn{padding:3px 11px;border:1px solid var(--line)}
+
+  /* ---------- ⑤ 柠檬只标「先看这里」 ---------- */
+  /* 柠檬只给两件事：**今天新增的岗**（.grp-badge.new）和**我已经投了**（.mark.on）。
+     第一版把 .hd-chip 也刷成柠檬，结果「台账共 48 条」「09:07 核过」这种纯元数据
+     跟「今天新扫到 6 条」长得一模一样——一个标记什么都标，就等于什么都不标。
+     .hd-chip 保持描边胶囊，不进柠檬。 */
+  .grp-badge.new,.mark.on,.toast{
+    background:var(--pop);color:var(--pop-ink);border-color:var(--pop-line);
+  }
+  .grp-badge.new{font-weight:600}
+  .mark.on{color:var(--pop-ink)}
+  .mark.on{transform:none}
+  .mark.on:hover{background:var(--pop);color:var(--pop-ink);border-color:var(--pop-line)}
+  .toast a{color:var(--pop-ink)}
+  .t10row.hot{border-left-width:3px;border-left-color:var(--pop)}
+  .fx i{background:var(--pop)}
+  /* 悬停用中性灰洗，**不能用淡柠檬**：淡柠檬已经是「今天要做的那一行」
+     （.lg-todo / .t10row.hot）的底色，鼠标一划过就把普通行画成待办行＝状态失明。 */
+  .t10row:hover,.jc>summary.jc-sum:hover,.lg-sum:hover,details.fold>summary:hover{
+    background:var(--surface-2);
+  }
+  a.jd-link:hover{border-bottom-color:var(--ink);border-bottom-width:2px}
+
+  /* ---------- 侧栏：站名做成柠檬胶囊标 ---------- */
+  .side-brand{
+    display:inline-block;align-self:flex-start;
+    background:var(--pop);color:var(--pop-ink);
+    border:1.4px solid var(--pop-line);border-radius:999px;
+    padding:6px 14px 7px;font-size:17px;letter-spacing:0;
+  }
+  .side-brand span{color:rgba(10,10,10,.62)}
+  .sn-h em{color:var(--faint)}
+
+  /* 窄屏：顶部吸顶条变成浮动胶囊卡（hilos 的悬浮导航），不再是通栏色带 */
+  @media (max-width:1179px){
+    .side{
+      margin:10px 12px 18px;border:1.4px solid var(--card-line);border-radius:20px;
+      border-bottom:1.4px solid var(--card-line);background:var(--surface);
+      box-shadow:var(--card-shadow);top:8px;padding:12px 14px;
+    }
+    .side-brand{font-size:15px;padding:4px 11px 5px}
+  }
+
+  /* 窄屏字号：style.css 的 @media 排在本文件之前，同权重下后来者赢，
+     所以这里必须把它压过的那几条重新写一遍，否则手机上是桌面字号（R20-6）。 */
+  @media (max-width:900px){
+    .today{padding:24px 18px 20px;border-radius:22px;margin:6px 0 8px}
+    .today-h{font-size:34px;margin-bottom:22px}
+    .tc-score{font-size:54px}
+    .part h2,h2,.rest-hd h2{font-size:24px}
+    .fn b{font-size:28px}
+  }
+
+  /* 唯一新增的动效是卡片 hover 的位移（transform，不动布局）。
+     style.css 的 reduced-motion 块排在本文件之前，管不到它，所以这里自带一条。 */
+  @media (prefers-reduced-motion: reduce){
+    .tcard{transition:none}
+    .tcard:hover{transform:none}
+  }
