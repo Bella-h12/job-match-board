@@ -43,8 +43,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import score as _score
 import glob as _glob
 _jd = {}
+_all_items = []
 for _f in _glob.glob(os.path.join(WS, "jd-cache", "*-out.json")):
+    if "search" in os.path.basename(_f) or "companies" in os.path.basename(_f):
+        continue
     for _it in json.load(io.open(_f, encoding="utf-8")):
+        _all_items.append(_it)
         try:
             _jid = _it["call"]["args"]["job_id"]
             _t = json.loads(_it["result"]).get("sections", {}).get("job_posting", "")
@@ -53,21 +57,66 @@ for _f in _glob.glob(os.path.join(WS, "jd-cache", "*-out.json")):
         except Exception:
             pass
 
+_cos_p = os.path.join(WS, "companies.json")
+_cos = json.load(io.open(_cos_p, encoding="utf-8")) if os.path.exists(_cos_p) else {}
+
+
+def growth_full(jid, co):
+    """公司发展四问：ai/principal 从 JD 判，growing 从公司页判，durable 目前无来源 → na。"""
+    g = _score.growth_from_jd(_jd.get(jid, ""), co)
+    slug = None
+    try:
+        refs = json.loads(next(it["result"] for it in _all_items if it["call"]["args"]["job_id"] == jid))
+        cref = [x for x in refs.get("references", {}).get("job_posting", []) if x.get("kind") == "company"]
+        slug = cref[0]["url"].strip("/").split("/")[-1] if cref else None
+    except Exception:
+        pass
+    c = _cos.get(slug) if slug else None
+    gv, gw = _score.growing_from_company(c)
+    g["growing"] = gv
+    g["durable"] = "na"
+    g["why"] = g["why"] + "；growing：%s；durable：融资/Glassdoor 暂无可核来源，未核" % gw
+    return g
+
+
 # 动作标签：纯代码，按适配度分档。2026-08-29 Bella：「标签和量化计算都是 Python 固定的，不要用模型。」
 ACT_GO, ACT_ASK = 60, 40
 
 
+def _short(t, n=22):
+    t = (t or "").strip()
+    return t if len(t) <= n else t[:n] + "…"
+
+
 def act_of(r):
+    """动作 + 一句人话。全部由命中/未命中的 JD 原文推出，不用模型。"""
     fit = r.get("fit")
     if fit is None:
         return "ref", ""
+    must = r.get("must") or []
+    miss = [t for t, h, *_ in must if h == 0]
+    half = [t for t, h, *_ in must if h == 0.5]
     if r.get("wall"):
         return "skip", "不投：年限硬挡"
     if fit >= ACT_GO:
-        return "go", "今天投：命中 %g/%d" % (r["hit"], r["tot"])
+        return "go", "今天投：硬性要求 %g/%d 条对得上" % (r["hit"], r["tot"])
     if fit >= ACT_ASK:
-        return "ref", "先问再投：命中 %g/%d" % (r["hit"], r["tot"])
-    return "skip", "不投：命中 %g/%d" % (r["hit"], r["tot"])
+        gap = miss[0] if miss else (half[0] if half else "")
+        return "ref", ("先问再投：JD 要「%s」，你没有，先问是不是硬筛" % _short(gap)) if gap else "先问再投"
+    return "skip", "不投：%d 条硬性要求里只对上 %g 条" % (r["tot"], r["hit"])
+
+
+def ammo_of(r):
+    """「拿什么打」= 命中的 JD 要求原文；「拦你的」= 没命中的。数据本来就有，不靠模型。"""
+    must = r.get("must") or []
+    hit = [t for t, h, *_ in must if h == 1]
+    miss = [t for t, h, *_ in must if h == 0]
+    half = [t for t, h, *_ in must if h == 0.5]
+    ammo = "；".join("「%s」" % _short(t, 60) for t in hit[:4]) if hit else ""
+    gap = "；".join("「%s」" % _short(t, 60) for t in (miss + half)[:4]) if (miss or half) else ""
+    if half and not miss:
+        gap = "没有硬缺，但这几条只对上一半：" + gap
+    return ammo, gap
 
 
 jobs = []
@@ -95,12 +144,12 @@ for r in scored:
                       if r.get("kind") == "无硬门槛" else ""),
         reqs=dict(must=[[t, h] for t, h, _ in (r.get("must") or [])],
                   nice=[[t, h] for t, h in (r.get("nice") or [])]),
-        growth_by=_score.growth_from_jd(_jd.get(jid, ""), r.get("co", "")),
+        growth_by=growth_full(jid, r.get("co", "")),
         pay_aed=p.get("pay_aed"), pay=p.get("pay"),
         clicked=clicked(meta), d1=None, applicants=None,
         senior="", apply="linkedin",
         # 下面这些是「看板」那一层，没写就留空，页面上不渲染
-        why=p.get("why", ""), ammo=p.get("ammo", ""), gapnote=p.get("gapnote", ""),
+        why=p.get("why", ""), ammo=(p.get("ammo") or ammo_of(r)[0]), gapnote=(p.get("gapnote") or ammo_of(r)[1]),
         act=(p.get("act") or act_of(r)[1]), act_kind=act_of(r)[0],
         act_short=act_of(r)[1],
         reach=p.get("reach") or dict(kind="none", note=""),

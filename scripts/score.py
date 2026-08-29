@@ -25,8 +25,37 @@ AI_RX = _re.compile(r"\b(?:LLM|LLMs|large language model|agentic|AI agent|GenAI|
 AGENCY_RX = _re.compile(r"our client|on behalf of (?:our|a) client|staffing|recruitment agency|"
                         r"recruiting agency|talent partner|contract staffing|C2C|W2 contract|"
                         r"placement agency|consultancy is hiring for", _re.I)
-GROWTH_DIMS = [("ai", "碰的是 AI 产品本身"), ("principal", "雇主是甲方")]
-GROWTH_SCALE = {"yes": 50, "half": 25, "no": 0}
+# 2026-08-29 Bella：「公司的发展你还是要去调研」。第三问「在不在长」从 LinkedIn 公司页读
+# 公开事实（员工规模 / 成立年份 / 两年增速 / 中位任期），全部确定性判；
+# 第四问「三年后值不值钱」（融资轮次 / Glassdoor）目前没有可确定性读的公开来源，
+# **留位、记 None，页面上写「未核」**——不猜，也不拿模型顶。
+GROWTH_DIMS = [("ai", "碰的是 AI 产品本身"), ("principal", "雇主是甲方"),
+               ("growing", "公司在长"), ("durable", "三年后还值钱")]
+GROWTH_SCALE = {"yes": 25, "half": 12, "no": 0, "na": 0}
+GROWTH_MARK = {"yes": "✓", "half": "½", "no": "✗", "na": "未核"}
+
+
+def growing_from_company(c):
+    """从公司页事实判「在不在长」。返回 (yes/half/no/na, 判据)。"""
+    if not c:
+        return "na", "没抓到公司页"
+    g, ten, emp, founded = c.get("growth_2y"), c.get("tenure"), c.get("employees"), c.get("founded")
+    if g is not None:                       # 有 Insights（Premium）就用最硬的那个数
+        v = "yes" if g >= 30 else "half" if g >= 0 else "no"
+        why = "两年员工增速 %d%%" % g
+        if ten is not None and ten < 1.5:
+            v = "half" if v == "yes" else "no"; why += "，但中位任期 %.1f 年偏短" % ten
+        return v, why
+    if founded and emp:                     # 没 Insights：成立年份 × 规模粗判
+        import datetime
+        age = datetime.date.today().year - founded
+        big = int(_re.sub(r"[^\d]", "", emp.split("-")[-1]) or 0)
+        if age <= 6 and big >= 51:
+            return "yes", "成立 %d 年已到 %s 人" % (age, emp)
+        if big >= 1001:
+            return "half", "成熟大厂（%s 人），增速未知" % emp
+        return "half", "成立 %d 年 · %s 人，两年增速未读到（Insights 要 Premium）" % (age, emp)
+    return "na", "公司页没有规模/成立年份"
 GROWTH_MARK = {"yes": "✓", "half": "½", "no": "✗"}
 
 
@@ -61,12 +90,17 @@ def growth_of(j):
         return None, None
     def _norm(v):
         v = str(v or "no").strip().lower()
-        for k in ("yes", "half", "no"):
+        for k in ("yes", "half", "no", "na"):
             if v.startswith(k):
                 return k
-        return "no"
+        return "na"
     detail = [(label, _norm(g.get(k)), GROWTH_SCALE[_norm(g.get(k))]) for k, label in GROWTH_DIMS]
-    return sum(d[2] for d in detail), detail
+    # 未核的那几问不进分母：三问核出来就按 75 满分折成 100，不让「查不到」拉低分数，
+    # 也不让它变成 0 冒充「查过了是差」。全部未核 → None（这个岗没有公司发展分）。
+    known = [d for d in detail if d[1] != "na"]
+    if not known:
+        return None, detail
+    return round(sum(d[2] for d in known) * 100.0 / (25 * len(known))), detail
 
 # ================================================================ 适配度（0–100）
 # 2026-08-27 重写（Bella 当场纠正，第二次动这一项）。

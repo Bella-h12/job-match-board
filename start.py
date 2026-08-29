@@ -117,6 +117,7 @@ def main():
     run(os.path.join(S, "fetch_jobs.py"), ws, "--max-per-role", "15")
     if env.get("JMB_EMAIL_PASS"):
         run(os.path.join(S, "fetch_inbox.py"), ws, env=env, check=False)
+    run(os.path.join(S, "fetch_companies.py"), ws, check=False)   # 公司页事实；抓不到就未核
     run(os.path.join(S, "run.py"), ws)
     run(os.path.join(S, "enrich.py"), ws, env=env)
     run(os.path.join(S, "board", "make_board_json.py"), ws)

@@ -56,8 +56,16 @@ g = score.growth_from_jd("Our client, a bank, is hiring a QA engineer via our st
 ck("代招字眼 → principal=no", g["principal"] == "no", g)
 g = score.growth_from_jd("We are a bank hiring a QA engineer for our own team.", "Bank")
 ck("没有代招字眼 → principal=yes", g["principal"] == "yes", g)
-v, d = score.growth_of(dict(growth_by=dict(ai="yes", principal="no")))
-ck("两问 50+0 = 50", v == 50 and len(d) == 2, (v, d))
+v, d = score.growth_of(dict(growth_by=dict(ai="yes", principal="no", growing="yes", durable="na")))
+ck("三问核出 25+0+25、第四问未核不进分母 → 67", v == 67 and len(d) == 4, (v, d))
+v, d = score.growth_of(dict(growth_by=dict(ai="na", principal="na", growing="na", durable="na")))
+ck("四问全未核 → None（不是 0）", v is None, v)
+gv, gw = score.growing_from_company(dict(growth_2y=45, tenure=2.3))
+ck("两年增速 45% → growing=yes", gv == "yes", (gv, gw))
+gv, gw = score.growing_from_company(dict(growth_2y=45, tenure=1.1))
+ck("增速高但任期 1.1 年 → 降一档", gv == "half", (gv, gw))
+gv, gw = score.growing_from_company(None)
+ck("没抓到公司页 → na 不猜", gv == "na", gv)
 
 print("逐条判定（拿一份合成事实清单）")
 j = F.Judge(dict(years_total=5, title_years={r"product (manage(ment|r)|owner)": 0,
