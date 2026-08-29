@@ -118,6 +118,7 @@ def main():
     if env.get("JMB_EMAIL_PASS"):
         run(os.path.join(S, "fetch_inbox.py"), ws, env=env, check=False)
     run(os.path.join(S, "fetch_companies.py"), ws, check=False)   # 公司页事实；抓不到就未核
+    run(os.path.join(S, "fetch_company_facts.py"), ws, check=False)  # 融资/Glassdoor：本机 Claude Code / Codex 联网查
     run(os.path.join(S, "run.py"), ws)
     run(os.path.join(S, "enrich.py"), ws, env=env)
     run(os.path.join(S, "board", "make_board_json.py"), ws)

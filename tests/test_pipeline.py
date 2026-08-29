@@ -66,6 +66,12 @@ gv, gw = score.growing_from_company(dict(growth_2y=45, tenure=1.1))
 ck("增速高但任期 1.1 年 → 降一档", gv == "half", (gv, gw))
 gv, gw = score.growing_from_company(None)
 ck("没抓到公司页 → na 不猜", gv == "na", gv)
+dv, dw = score.durable_from_company(dict(funding=dict(stage="IPO"), glassdoor=dict(rating=4.1, reviews=57)))
+ck("IPO + Glassdoor 4.1 → durable=yes", dv == "yes", (dv, dw))
+dv, dw = score.durable_from_company(dict(funding=dict(stage="Seed"), glassdoor=dict(rating=4.8, reviews=3)))
+ck("早期 + 评价太少不计 → durable=no", dv == "no", (dv, dw))
+dv, dw = score.durable_from_company(dict(funding=None, glassdoor=None))
+ck("融资/Glassdoor 都没查到 → na 不猜", dv == "na", dv)
 
 print("逐条判定（拿一份合成事实清单）")
 j = F.Judge(dict(years_total=5, title_years={r"product (manage(ment|r)|owner)": 0,

@@ -79,8 +79,9 @@ def growth_full(jid, co):
     c = _cos.get(_slug_of.get(jid)) if _slug_of.get(jid) else None
     gv, gw = _score.growing_from_company(c)
     g["growing"] = gv
-    g["durable"] = "na"
-    g["why"] = g["why"] + "；growing：%s；durable：融资/Glassdoor 暂无可核来源，未核" % gw
+    dv, dw = _score.durable_from_company(c)
+    g["durable"] = dv
+    g["why"] = g["why"] + "；growing：%s；durable：%s" % (gw, dw)
     return g
 
 

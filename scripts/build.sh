@@ -4,6 +4,7 @@ set -e
 WS="$1"; [ -d "$WS" ] || { echo "用法：bash scripts/build.sh workspace/<名字>"; exit 1; }
 D="$(cd "$(dirname "$0")" && pwd)"
 python3 "$D/fetch_companies.py" "$WS"      # 公司页事实（在不在长）
+python3 "$D/fetch_company_facts.py" "$WS" # 融资/Glassdoor（本机 Claude Code / Codex 联网查）
 python3 "$D/run.py" "$WS"
 python3 "$D/enrich.py" "$WS"                 # 没 key 会自动跳过
 python3 "$D/board/make_board_json.py" "$WS"

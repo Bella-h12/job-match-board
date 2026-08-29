@@ -45,6 +45,38 @@ def _emp_upper(emp):
     return int(n * (1000 if u == "K" else 1000000 if u == "M" else 1))
 
 
+def durable_from_company(c):
+    """第四问「三年后值不值钱」：融资阶段 + Glassdoor，确定性阈值。查不到 → na。
+
+    来源是本机 Claude Code / Codex 联网检索出来的公开事实（带出处 URL），不是模型的印象。
+    """
+    if not c:
+        return "na", "没抓到公司事实"
+    f = (c.get("funding") or {}); gd = (c.get("glassdoor") or {})
+    stage = (f.get("stage") or "").lower(); rating = gd.get("rating"); reviews = gd.get("reviews") or 0
+    if not stage and rating is None:
+        return "na", "融资 / Glassdoor 都没查到"
+    pts, why = 0, []
+    if stage:
+        if any(k in stage for k in ("ipo", "public", "series d", "series e", "series f", "series g", "series h")):
+            pts += 2; why.append("融资阶段 %s" % f.get("stage"))
+        elif any(k in stage for k in ("series b", "series c")):
+            pts += 1; why.append("融资阶段 %s" % f.get("stage"))
+        else:
+            why.append("融资阶段 %s（早期）" % f.get("stage"))
+    if rating is not None and reviews >= 10:
+        if rating >= 4.0:
+            pts += 2; why.append("Glassdoor %.1f（%d 条）" % (rating, reviews))
+        elif rating >= 3.5:
+            pts += 1; why.append("Glassdoor %.1f（%d 条）" % (rating, reviews))
+        else:
+            why.append("Glassdoor %.1f 偏低（%d 条）" % (rating, reviews))
+    elif rating is not None:
+        why.append("Glassdoor %.1f 但只有 %d 条评价，不计" % (rating, reviews))
+    v = "yes" if pts >= 3 else "half" if pts >= 1 else "no"
+    return v, "；".join(why)
+
+
 def growing_from_company(c):
     """从公司页事实判「在不在长」。返回 (yes/half/no/na, 判据)。"""
     if not c:
