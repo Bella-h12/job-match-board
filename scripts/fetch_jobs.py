@@ -51,7 +51,8 @@ def main():
     pairs = []
     for it in json.load(io.open(s_out, encoding="utf-8")):
         r = it.get("result"); blob = r if isinstance(r, str) else json.dumps(r, ensure_ascii=False)
-        for jid in re.findall(r'"job_id"\s*:\s*"?(\d{6,})"?', blob):
+        for m in re.findall(r'/jobs/view/(\d{6,})/|"job_ids"\s*:\s*\[\s*"(\d{6,})"', blob):
+            jid = m[0] or m[1]
             if jid not in seen:
                 seen.add(jid); ids.append(jid)
         try:
@@ -75,7 +76,8 @@ def main():
                    for t, co in pairs], s2)
         for it in json.load(io.open(s2, encoding="utf-8")):
             r = it.get("result"); blob = r if isinstance(r, str) else json.dumps(r, ensure_ascii=False)
-            for jid in re.findall(r'"job_id"\s*:\s*"?(\d{6,})"?', blob)[:1]:   # 只取 Selected 那条
+            for m in re.findall(r'/jobs/view/(\d{6,})/|"job_ids"\s*:\s*\[\s*"(\d{6,})"', blob)[:1]:   # 只取 Selected 那条
+                jid = m[0] or m[1]
                 if jid not in seen:
                     seen.add(jid); ids.append(jid)
     print("拿到 %d 个岗位 ID" % len(ids))

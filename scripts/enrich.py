@@ -5,6 +5,7 @@
     export JMB_MODEL_KEY=...          # 用户自己的 key
     export JMB_MODEL_PROVIDER=anthropic|openai   # 默认 anthropic
     export JMB_MODEL=claude-sonnet-5  # 可选
+    export JMB_MODEL_BASE=https://…   # 可选：任何兼容接口（DeepSeek / OpenRouter / 自建）
     python3 scripts/enrich.py workspace/<名字>
 
 产物 workspace/<名字>/prose.json —— 跟打分数据分开存，重跑打分不会冲掉它。
@@ -54,7 +55,8 @@ SYSTEM = """你是求职情报值班员。只输出 JSON，不输出别的。
 
 def ask(prompt):
     if PROVIDER == "anthropic":
-        req = urllib.request.Request("https://api.anthropic.com/v1/messages",
+        base = os.environ.get("JMB_MODEL_BASE", "https://api.anthropic.com")
+        req = urllib.request.Request(base.rstrip("/") + "/v1/messages",
             data=json.dumps(dict(model=MODEL, max_tokens=1200, system=SYSTEM,
                                  messages=[dict(role="user", content=prompt)])).encode(),
             headers={"x-api-key": KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"})
