@@ -47,7 +47,15 @@ def growth_of(j):
     g = j.get("growth_by")
     if not g:
         return None, None
-    detail = [(label, g.get(k, "no"), GROWTH_SCALE[g.get(k, "no")]) for k, label in GROWTH_DIMS]
+    # 模型/别人写的取值可能带理由（实测 DeepSeek 写了「no（JD 未出现 AI 相关表述，无出处）」）。
+    # 只认开头的 yes / half / no；认不出一律按 no —— 给不出出处就是 no，这本来就是规则。
+    def _norm(v):
+        v = str(v or "no").strip().lower()
+        for k in ("yes", "half", "no"):
+            if v.startswith(k):
+                return k
+        return "no"
+    detail = [(label, _norm(g.get(k)), GROWTH_SCALE[_norm(g.get(k))]) for k, label in GROWTH_DIMS]
     return sum(d[2] for d in detail), detail
 
 # ================================================================ 适配度（0–100）
