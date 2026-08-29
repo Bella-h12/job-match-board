@@ -191,7 +191,36 @@ def main():
         else:
             lacks.append(rx)
 
+    # 适合他的岗位方向：从**专项年限最长的 title** 推，不由外部随手填。
+    # 2026-08-29：一份 4.8 年自动化测试工程师的简历，config 里被填成「Data Analyst」——
+    # 方向错了，后面搜到的岗全是别人的岗。方向的唯一来源是简历，用户可以改，但默认得对。
+    ROLE_QUERY = {"qa engineer": ["QA Automation Engineer", "SDET", "Test Engineer"],
+                  "data analyst": ["Data Analyst", "Business Analyst", "Analytics"],
+                  "data scientist": ["Data Scientist", "Applied Scientist"],
+                  "ml engineer": ["Machine Learning Engineer", "AI Engineer"],
+                  "software engineer": ["Software Engineer", "Backend Engineer", "Full Stack Engineer"],
+                  "product manager": ["Product Manager", "Product Owner"],
+                  "growth": ["Growth Manager", "Growth Analyst"],
+                  "operations": ["Operations Manager", "Business Operations"],
+                  "pre-sales": ["Solutions Engineer", "Solutions Architect"],
+                  "consultant": ["Consultant", "Business Analyst"],
+                  "designer": ["Product Designer", "UX Designer"],
+                  "marketing": ["Marketing Manager", "Growth Marketing"],
+                  "sales": ["Business Development", "Account Executive"],
+                  "project manager": ["Project Manager", "Delivery Manager"],
+                  "founder": ["Product Manager", "Founding Engineer"]}
+    ranked = sorted(((v, n) for (rx, n), v in zip(TITLE_RX, [title_years[rx] for rx, _ in TITLE_RX]) if v > 0), reverse=True)
+    suggested = []
+    for _, n in ranked[:2]:
+        for q in ROLE_QUERY.get(n, [n.title()]):
+            if q not in suggested:
+                suggested.append(q)
+    # AI 相关经历是加分项：简历里提到 agent/LLM 的，追加一个 AI 方向的查询词
+    if any(k in has for k in (r"\bagent", r"\bllm\b|large language model|genai|generative ai")):
+        suggested.append("AI " + (ranked[0][1].title() if ranked else "Engineer"))
+
     out = dict(source=os.path.basename(src), confirmed=False,
+               suggested_roles=suggested,
                years_total=total, title_years=title_years,
                has=has, lacks=lacks, partial=PARTIAL,
                _evidence=evidence,
@@ -205,6 +234,7 @@ def main():
     print("总年限 %s 年" % total)
     print("专项年限：" + " · ".join("%s %g年" % (n, title_years[rx]) for rx, n in TITLE_RX if title_years[rx] > 0))
     print("简历上找到 %d 项 / 没找到 %d 项" % (len(has), len(lacks)))
+    print("从简历推出的岗位方向：" + " / ".join(suggested))
 
 
 if __name__ == "__main__":

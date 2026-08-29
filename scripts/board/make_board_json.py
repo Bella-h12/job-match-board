@@ -72,8 +72,11 @@ for r in scored:
         kind="job", note="",
     ))
 
+n_scored = sum(1 for j in jobs if j.get("growth_by"))
 out = dict(today=date.today().isoformat(), owner=cfg.get("name", ""),
-           roles=cfg.get("roles", []), jobs=jobs, callouts=prose.get("_callouts", []))
+           roles=cfg.get("roles", []), jobs=jobs, callouts=prose.get("_callouts", []),
+           scan_note="方向 %s · 抓到 %d 个岗 · 有公司发展判定的 %d 个" % (" / ".join(cfg.get("roles", [])[:3]), len(jobs), n_scored),
+           footer_line="%s · 首次生成 · %d 个岗 · 公司发展已核 %d 个 · 台账 0 条" % (date.today().isoformat(), len(jobs), n_scored))
 json.dump(out, io.open(os.path.join(WS, "board.json"), "w", encoding="utf-8"),
           ensure_ascii=False, indent=1)
 need = [j["id"] for j in jobs if not j["act_short"]]

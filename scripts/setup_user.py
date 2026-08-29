@@ -43,9 +43,13 @@ def main():
         raise SystemExit("简历解析失败，先把它转成 .txt 再试")
 
     # ② 岗位方向 / 邮箱 / LinkedIn 入口
+    roles = [x.strip() for x in a.roles.split(",") if x.strip()]
+    if not roles:                       # 没指定就用简历推出来的方向
+        fj = json.load(io.open(os.path.join(ws, "facts.json"), encoding="utf-8"))
+        roles = fj.get("suggested_roles") or []
     cfg = dict(
         name=a.name,
-        roles=[x.strip() for x in a.roles.split(",") if x.strip()],
+        roles=roles,
         location=a.location,
         email=a.email,
         linkedin_url=a.linkedin_url,

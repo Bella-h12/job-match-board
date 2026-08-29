@@ -43,14 +43,41 @@ def main():
         raise SystemExit("搜索失败：多半是 LinkedIn 没登录，或 uvx 起不来。先跑一次 "
                          "`python3 scripts/li_mcp.py` 看报什么")
 
+    # ⚠ search_jobs 只给「被选中那一条」的 Job ID，其余条目只有标题（SKILL §31，2026-08-11 实测）。
+    # 所以要两段：第一段从文本里抠出「标题 | 公司」，第二段用「公司名 + 岗位名」定向补搜，
+    # 那条几乎必然成为 Selected，ID 就拿到了。第一版只跑第一段，美国 QA 岗 1,000+ 条结果、0 个 ID。
+    import re
     ids, seen = [], set()
+    pairs = []
     for it in json.load(io.open(s_out, encoding="utf-8")):
-        blob = json.dumps(it.get("result"), ensure_ascii=False)
-        import re
+        r = it.get("result"); blob = r if isinstance(r, str) else json.dumps(r, ensure_ascii=False)
         for jid in re.findall(r'"job_id"\s*:\s*"?(\d{6,})"?', blob):
             if jid not in seen:
                 seen.add(jid); ids.append(jid)
-    ids = ids[: a.max_per_role * max(1, len(roles))]
+        try:
+            txt = json.loads(blob).get("sections", {}).get("search_results", "") if isinstance(r, str) else (r.get("sections", {}) or {}).get("search_results", "")
+        except Exception:
+            txt = ""
+        lines = [l.strip() for l in txt.split("\n") if l.strip()]
+        # 列表里每条的形状：标题 / 「标题 with verification」/ 公司 / 地点 …；取「with verification」前那行 + 下一行
+        for k, l in enumerate(lines):
+            if l.endswith("with verification") and k + 1 < len(lines):
+                title = l[: -len("with verification")].strip()
+                co = lines[k + 1]
+                if 3 < len(title) < 90 and 1 < len(co) < 60 and (title, co) not in pairs:
+                    pairs.append((title, co))
+    pairs = pairs[: a.max_per_role * max(1, len(roles))]
+    print("第一段拿到 %d 个直接 ID、%d 个「标题 | 公司」对；第二段定向补搜逼 ID" % (len(ids), len(pairs)))
+    if pairs:
+        s2 = os.path.join(cache, "search2-out.json")
+        run_batch([{"tool": "search_jobs", "args": {"keywords": "%s %s" % (co, t), "location": loc,
+                                                     "max_pages": 1, "date_posted": "past month"}}
+                   for t, co in pairs], s2)
+        for it in json.load(io.open(s2, encoding="utf-8")):
+            r = it.get("result"); blob = r if isinstance(r, str) else json.dumps(r, ensure_ascii=False)
+            for jid in re.findall(r'"job_id"\s*:\s*"?(\d{6,})"?', blob)[:1]:   # 只取 Selected 那条
+                if jid not in seen:
+                    seen.add(jid); ids.append(jid)
     print("拿到 %d 个岗位 ID" % len(ids))
     if not ids:
         raise SystemExit("一个 ID 都没拿到 —— 取到 0 条要当失败处理，不是「今天没岗位」。"
