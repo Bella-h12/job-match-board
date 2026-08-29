@@ -57,6 +57,18 @@ for _f in _glob.glob(os.path.join(WS, "jd-cache", "*-out.json")):
         except Exception:
             pass
 
+# 岗位 → 公司 slug：从每份 JD 的 references 里取 kind=company 的那条。
+# ⚠ 原来用 next(… job_id == jid) 在所有缓存条目里找，search 缓存里也有同 id 的条目、
+# 没有 references，于是拿到 None 后回落到别家（Cerebras 显示成了 Capgemini 的 10,001+）。
+_slug_of = {}
+for _it in _all_items:
+    try:
+        _r = json.loads(_it["result"])
+        _cref = [x for x in _r.get("references", {}).get("job_posting", []) if x.get("kind") == "company"]
+        if _cref:
+            _slug_of[_it["call"]["args"]["job_id"]] = _cref[0]["url"].strip("/").split("/")[-1]
+    except Exception:
+        pass
 _cos_p = os.path.join(WS, "companies.json")
 _cos = json.load(io.open(_cos_p, encoding="utf-8")) if os.path.exists(_cos_p) else {}
 
@@ -64,14 +76,7 @@ _cos = json.load(io.open(_cos_p, encoding="utf-8")) if os.path.exists(_cos_p) el
 def growth_full(jid, co):
     """公司发展四问：ai/principal 从 JD 判，growing 从公司页判，durable 目前无来源 → na。"""
     g = _score.growth_from_jd(_jd.get(jid, ""), co)
-    slug = None
-    try:
-        refs = json.loads(next(it["result"] for it in _all_items if it["call"]["args"]["job_id"] == jid))
-        cref = [x for x in refs.get("references", {}).get("job_posting", []) if x.get("kind") == "company"]
-        slug = cref[0]["url"].strip("/").split("/")[-1] if cref else None
-    except Exception:
-        pass
-    c = _cos.get(slug) if slug else None
+    c = _cos.get(_slug_of.get(jid)) if _slug_of.get(jid) else None
     gv, gw = _score.growing_from_company(c)
     g["growing"] = gv
     g["durable"] = "na"
