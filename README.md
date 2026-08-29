@@ -10,8 +10,9 @@
 ```bash
 git clone https://github.com/Bella-h12/job-match-board && cd job-match-board
 
-# 1  简历（.pdf / .docx / .txt）。方向不用填，脚本从简历推；要改就 --roles 指定
-python3 scripts/setup_user.py --name alex --resume ~/Desktop/resume.pdf --location "United States"
+# 1  简历（.pdf / .docx / .txt）。会问你两件事：想在哪个地区找、LinkedIn 从哪页读
+#    方向不用填，脚本从简历推（要改就 --roles）；显示名默认取简历第一行（要改就 --display-name）
+python3 scripts/setup_user.py --name alex --resume ~/Desktop/resume.pdf
 
 # 2  ⚠ 本人过一遍 workspace/alex/facts.json，把 confirmed 改成 true（理由见下）
 

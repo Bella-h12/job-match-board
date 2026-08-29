@@ -215,9 +215,6 @@ def main():
         for q in ROLE_QUERY.get(n, [n.title()]):
             if q not in suggested:
                 suggested.append(q)
-    # AI 相关经历是加分项：简历里提到 agent/LLM 的，追加一个 AI 方向的查询词
-    if any(k in has for k in (r"\bagent", r"\bllm\b|large language model|genai|generative ai")):
-        suggested.append("AI " + (ranked[0][1].title() if ranked else "Engineer"))
 
     out = dict(source=os.path.basename(src), confirmed=False,
                suggested_roles=suggested,

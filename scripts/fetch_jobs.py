@@ -6,7 +6,7 @@
 它用的是**用户自己已登录的浏览器会话**（mcp-server-linkedin 驱动本机 Chrome）。
 不代登录、不存密码——LinkedIn 的推荐页在登录墙后面，代登录违反条款且封的是用户的号。
 """
-import argparse, io, json, os, subprocess, sys, time
+import argparse, io, json, os, re, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -29,6 +29,18 @@ def main():
     os.makedirs(cache, exist_ok=True)
 
     roles = cfg.get("roles") or []
+    # 方向词 → 标题匹配用的词干（QA Automation Engineer → qa / automation / test / sdet …）
+    _stems = set()
+    for r in roles:
+        for w in re.findall(r"[A-Za-z]+", r.lower()):
+            if w not in ("engineer", "senior", "junior", "lead", "manager", "ai", "and", "of", "the"):
+                _stems.add(w)
+    _stems |= {"sdet", "test", "testing", "qa", "quality"} if _stems & {"qa", "sdet", "test", "automation"} else set()
+
+    def role_hit(title):
+        t = title.lower()
+        return any(w in t for w in _stems)
+
     if not roles:
         raise SystemExit("config.json 里没有 roles —— 先说清楚想投什么方向，否则只能瞎搜")
     loc = cfg.get("location") or ""
@@ -65,6 +77,11 @@ def main():
             if l.endswith("with verification") and k + 1 < len(lines):
                 title = l[: -len("with verification")].strip()
                 co = lines[k + 1]
+                # ⚠ 2026-08-29：搜「SDET」第一条是「Founding Prompt Engineer」——那是 LinkedIn
+                # 塞进结果页的推荐位，不是搜索命中。照单全收的结果：60 个岗里只有 19 个是测试岗，
+                # 决策台三张卡全不是测试岗（Bella 当场指出）。**标题必须跟方向词对得上才收。**
+                if not role_hit(title):
+                    continue
                 if 3 < len(title) < 90 and 1 < len(co) < 60 and (title, co) not in pairs:
                     pairs.append((title, co))
     pairs = pairs[: a.max_per_role * max(1, len(roles))]

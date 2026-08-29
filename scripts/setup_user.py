@@ -28,8 +28,31 @@ def main():
     ap.add_argument("--linkedin-url", default=DEFAULT_LINKEDIN,
                     help="LinkedIn 岗位入口页。默认用 Recommended；"
                          "想用「你最可能被选中」那一页就把它的完整 URL 贴进来")
-    ap.add_argument("--location", default="", help="目标城市/地区，例如 Dubai")
+    ap.add_argument("--location", default="", help="目标城市/地区，例如 Dubai / United States / Remote")
+    ap.add_argument("--display-name", default="", help="看板上显示的名字，默认从简历第一行抽")
+    ap.add_argument("--yes", action="store_true", help="非交互：缺的项直接报错退出，不提问")
     a = ap.parse_args()
+
+    # 2026-08-29 Bella 指出：全流程走完没问用户想在哪找、LinkedIn 从哪读。
+    # 这两样不能由脚本替他填——地区填错，抓到的全是别人的岗。
+    def need(val, prompt, default=""):
+        if val:
+            return val
+        if a.yes:
+            if default:
+                return default
+            raise SystemExit("缺少：%s" % prompt)
+        try:
+            v = input("%s%s: " % (prompt, (" [%s]" % default) if default else "")).strip()
+        except EOFError:
+            v = ""
+        return v or default
+    a.location = need(a.location, "想在哪个地区找（例如 Dubai / United States / Remote）")
+    if not a.location:
+        raise SystemExit("地区是必填的：不填就没法搜，填错抓到的全是别人的岗。")
+    a.linkedin_url = need(a.linkedin_url if a.linkedin_url != DEFAULT_LINKEDIN else "",
+                          "LinkedIn 岗位入口。有「Jobs where you'd be a top applicant」那页就贴它的 URL；"
+                          "没有就回车，走关键词搜索", DEFAULT_LINKEDIN)
 
     ws = os.path.join(ROOT, "workspace", a.name)
     os.makedirs(ws, exist_ok=True)
@@ -47,8 +70,15 @@ def main():
     if not roles:                       # 没指定就用简历推出来的方向
         fj = json.load(io.open(os.path.join(ws, "facts.json"), encoding="utf-8"))
         roles = fj.get("suggested_roles") or []
+    # 显示名：默认取简历第一行（通常就是姓名），用户可用 --display-name 覆盖
+    disp = a.display_name
+    if not disp:
+        cv = io.open(os.path.join(ws, "CV.txt"), encoding="utf-8").read()
+        first = next((l.strip() for l in cv.split("\n") if l.strip()), "")
+        disp = first[:20] if 1 < len(first) <= 20 else a.name
     cfg = dict(
         name=a.name,
+        display_name=disp,
         roles=roles,
         location=a.location,
         email=a.email,
