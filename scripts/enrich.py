@@ -1,30 +1,56 @@
 # -*- coding: utf-8 -*-
 """唯一需要模型的一步：给每个岗写「公司发展四问」和「行动建议 / 触达 / 弹药 / 缺口」。
 
-用法：
-    export JMB_MODEL_KEY=...          # 用户自己的 key
-    export JMB_MODEL_PROVIDER=anthropic|openai   # 默认 anthropic
-    export JMB_MODEL=claude-sonnet-5  # 可选
-    export JMB_MODEL_BASE=https://…   # 可选：任何兼容接口（DeepSeek / OpenRouter / 自建）
-    python3 scripts/enrich.py workspace/<名字>
+用法：python3 scripts/enrich.py workspace/<名字>
+
+**不需要 API key。**按这个顺序找模型，找到哪个用哪个：
+  1. 环境变量 JMB_MODEL_KEY（自己的 key：Anthropic 格式或 OpenAI 兼容格式）
+  2. 本机的 `claude` 命令（Claude Code，走你已有的订阅）
+  3. 本机的 `codex` 命令（Codex CLI，走你已有的订阅）
+  4. 都没有 → 跳过，并且**明说排名会是空的**
+
+为什么这一步缺不得（2026-08-29 一个用户没输 key，看板上所有优先级都是横杠）：
+公司发展四问只有这一步会写，而规则是「适配度和公司发展缺任何一项就不给优先级」——
+没有它，每个岗都判未核，排名整个是空的。所以宁可用本机已有的 Claude Code / Codex，
+也不能让它静默跳过。
 
 产物 workspace/<名字>/prose.json —— 跟打分数据分开存，重跑打分不会冲掉它。
-没有 key 就跳过：看板照样出，只是决策台是空的、卡上没有点评。**不编。**
-
-两条纪律：
-· 公司发展四问每一道都要带出处（JD 或公司页的原话），给不出出处一律记 no。
-· 触达路径不许编人名——JD 没露出招聘团队，就写「无人可触达」。
+纪律：公司发展四问每道要带出处，给不出出处一律记 no；触达路径不许编人名。
 """
-import io, json, os, sys, urllib.request
+import io, json, os, shutil, subprocess, sys, urllib.request
 
 WS = os.path.abspath(sys.argv[1])
 KEY = os.environ.get("JMB_MODEL_KEY")
 PROVIDER = os.environ.get("JMB_MODEL_PROVIDER", "anthropic")
 MODEL = os.environ.get("JMB_MODEL") or ("claude-sonnet-5" if PROVIDER == "anthropic" else "gpt-5")
 
-if not KEY:
-    print("没有 JMB_MODEL_KEY —— 跳过点评，看板照出但决策台为空（不编内容）")
+def _find(cmd):
+    p = shutil.which(cmd)
+    if p:
+        return p
+    for c in (os.path.expanduser("~/.local/bin/" + cmd), os.path.expanduser("~/.npm-global/bin/" + cmd),
+              "/usr/local/bin/" + cmd, "/opt/homebrew/bin/" + cmd):
+        if os.path.exists(c):
+            return c
+    return None
+
+if KEY:
+    BACKEND = "key"
+elif _find("claude"):
+    BACKEND = "claude"
+elif _find("codex"):
+    BACKEND = "codex"
+else:
+    BACKEND = None
+
+if not BACKEND:
+    print("没有模型可用：没有 JMB_MODEL_KEY，本机也没有 claude / codex 命令。")
+    print("⚠ 跳过点评 → 公司发展四问为空 → **所有岗都会判未核，排名是空的**。")
+    print("  三选一：装 Claude Code（claude.com/claude-code）/ 装 Codex CLI / export JMB_MODEL_KEY=...")
     sys.exit(0)
+print("模型后端：%s" % {"key": "自己的 key（%s / %s）" % (PROVIDER, MODEL),
+                      "claude": "本机 Claude Code（走你的订阅）",
+                      "codex": "本机 Codex（走你的订阅）"}[BACKEND])
 
 scored = json.load(io.open(os.path.join(WS, "scored.json"), encoding="utf-8"))
 facts = json.load(io.open(os.path.join(WS, "facts.json"), encoding="utf-8"))
@@ -54,6 +80,14 @@ SYSTEM = """你是求职情报值班员。只输出 JSON，不输出别的。
 5. 不知道就说不知道，不要用「可能」「应该」编内容。"""
 
 def ask(prompt):
+    if BACKEND == "claude":
+        r = subprocess.run([_find("claude"), "-p", "--output-format", "text"],
+                           input=SYSTEM + "\n\n" + prompt, capture_output=True, text=True, timeout=180)
+        return r.stdout
+    if BACKEND == "codex":
+        r = subprocess.run([_find("codex"), "exec", "--skip-git-repo-check", SYSTEM + "\n\n" + prompt],
+                           capture_output=True, text=True, timeout=180)
+        return r.stdout
     if PROVIDER == "anthropic":
         base = os.environ.get("JMB_MODEL_BASE", "https://api.anthropic.com")
         req = urllib.request.Request(base.rstrip("/") + "/v1/messages",

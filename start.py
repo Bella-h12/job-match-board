@@ -88,19 +88,25 @@ def main():
 
     # ---------- 4 模型 key ----------
     env = dict(os.environ)
+    import shutil
+    has_cli = shutil.which("claude") or os.path.exists(os.path.expanduser("~/.local/bin/claude")) or \
+              shutil.which("codex") or os.path.exists(os.path.expanduser("~/.npm-global/bin/codex"))
     if not env.get("JMB_MODEL_KEY"):
-        print("\n--- 你自己的模型 key ---")
-        print("这一步做什么：给每个岗写「公司发展四问 / 行动建议 / 触达路径 / 你的弹药与缺口」。")
-        print("会发生什么：每个岗调一次你的模型，**花的是你自己的额度**；发给模型商的内容是")
-        print("  该岗的 JD 全文 + 你的事实清单（年限、能力项），不含简历原文、不含邮箱。")
-        print("不给会怎样：分数和排序照样算（那部分零模型调用），只是决策台上没有点评那几行。")
-        print("支持：Anthropic 格式 / OpenAI 兼容格式（OpenAI、DeepSeek、OpenRouter、自建都行）。")
-        k = getpass.getpass("模型 key（回车跳过）: ").strip()
-        if k:
-            env["JMB_MODEL_KEY"] = k
-            env["JMB_MODEL_PROVIDER"] = ask("接口格式 anthropic / openai", "openai")
-            env["JMB_MODEL_BASE"] = ask("接口地址", "https://api.openai.com/v1" if env["JMB_MODEL_PROVIDER"] == "openai" else "https://api.anthropic.com")
-            env["JMB_MODEL"] = ask("模型名", "gpt-5" if env["JMB_MODEL_PROVIDER"] == "openai" else "claude-sonnet-5")
+        print("\n--- 模型（用来写每岗点评和公司发展四问；没有它排名是空的）---")
+        if has_cli:
+            print("检测到本机有 Claude Code / Codex，会直接用它（走你已有的订阅，不用 key）。")
+            print("发给模型的是：每个岗的 JD 全文 + 你的事实清单（年限、能力项）。不发简历原文、不发邮箱。")
+            if not yes("用本机的 Claude Code / Codex 吗？（n 则输入自己的 key）"):
+                has_cli = False
+        if not has_cli:
+            print("没有本机 Claude Code / Codex。要么装一个，要么给一个 key（Anthropic 或 OpenAI 兼容格式）。")
+            print("**没有模型这一步会跳过，所有岗的优先级都会是空的。**")
+            k = getpass.getpass("模型 key（回车跳过）: ").strip()
+            if k:
+                env["JMB_MODEL_KEY"] = k
+                env["JMB_MODEL_PROVIDER"] = ask("接口格式 anthropic / openai", "openai")
+                env["JMB_MODEL_BASE"] = ask("接口地址", "https://api.openai.com/v1" if env["JMB_MODEL_PROVIDER"] == "openai" else "https://api.anthropic.com")
+                env["JMB_MODEL"] = ask("模型名", "gpt-5" if env["JMB_MODEL_PROVIDER"] == "openai" else "claude-sonnet-5")
     if not env.get("JMB_EMAIL_PASS"):
         p = getpass.getpass("邮箱密码/应用专用密码（用来读回执；回车这次先不读）: ").strip()
         if p:
