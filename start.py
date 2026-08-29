@@ -62,9 +62,10 @@ def main():
     if not facts.get("confirmed"):
         print("\n--- 从简历抽出的事实清单（判据的唯一基准，必须你点头）---")
         print("总年限：%s 年" % facts.get("years_total"))
+        names = facts.get("title_names") or {}
         for k, v in (facts.get("title_years") or {}).items():
             if v:
-                print("  %-40s %g 年" % (k.split("|")[0][:40], v))
+                print("  %-24s %g 年" % (names.get(k, k.split("|")[0][:24]), v))
         print("简历上找到：" + "、".join(list((facts.get("_evidence") or {}).keys())))
         print("简历上没找到（lacks）：%d 项 —— 意思是「这份简历里没写」，不是「你一定不会」" % len(facts.get("lacks") or []))
         print("完整清单在 %s，不对就去改。" % facts_p)

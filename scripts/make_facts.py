@@ -219,6 +219,7 @@ def main():
     out = dict(source=os.path.basename(src), confirmed=False,
                suggested_roles=suggested,
                years_total=total, title_years=title_years,
+               title_names={rx: n for rx, n in TITLE_RX},
                has=has, lacks=lacks, partial=PARTIAL,
                _evidence=evidence,
                _spans=[dict(title=t, years=round(mo / 12, 1), line=l) for t, mo, _, _, _, _, l in spans],
