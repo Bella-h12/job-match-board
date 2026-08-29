@@ -56,7 +56,6 @@ def growing_from_company(c):
             return "half", "成熟大厂（%s 人），增速未知" % emp
         return "half", "成立 %d 年 · %s 人，两年增速未读到（Insights 要 Premium）" % (age, emp)
     return "na", "公司页没有规模/成立年份"
-GROWTH_MARK = {"yes": "✓", "half": "½", "no": "✗"}
 
 
 def growth_from_jd(jd_text, company=""):

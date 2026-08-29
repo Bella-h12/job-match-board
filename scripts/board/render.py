@@ -457,7 +457,7 @@ def card(j, rank):
         _d = ''.join('<span class="d-dim">%s <b>%s</b> %s</span>' % (GROWTH_MARK[v], sc, lbl)
                      for lbl, v, sc in j["growth_detail"])
         _why = (j.get("growth_by") or {}).get("why", "")
-        o.write(f'    <div class="jc-why-n"><b>公司发展 {j["v_growth"]}</b> ＝ 两问各 50 分：{_d}'
+        o.write(f'    <div class="jc-why-n"><b>公司发展 {j["v_growth"]}</b> ＝ 四问各 25 分：{_d}'
                 + (f'<span class="d-note">{_why}</span>' if _why else '') + '</div>\n')
     if j.get("unscored"):
         _why = j.get("unscored_why") or ""
