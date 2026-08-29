@@ -38,6 +38,10 @@ except Exception:
 # 8-10 就是这么翻车的：改了 parts/style.css、跑了 assemble，页面纹丝不动，
 # 因为 head 是从旧 HTML 里剪下来的，压根没读那个文件。
 head = old[:old.index('<style>')]
+_cfgT = json.load(io.open(os.path.join(_WS, 'config.json'), encoding='utf-8'))
+_title = '求职看板 · %s' % (_cfgT.get('display_name') or _cfgT.get('name') or '')
+head = head.replace('{{TITLE}}', _title)
+head = __import__('re').sub(r'<title>[^<]*</title>', '<title>%s</title>' % _title, head)
 assert 'name="viewport"' in head, '缺 viewport，CDP 量出来的 clientWidth 会是 980'
 # 2026-08-13：本地文件从来没有 charset，Chrome 只能靠猜。猜错就整页按 GBK 解 UTF-8
 # （「今日」变成「浠婃棩」）。线上没事——Artifact 外壳自己带 charset——但本地的
@@ -121,13 +125,13 @@ LIVE_URL = 'https://claude.ai/code/artifact/37f416a1-8953-40d7-ae81-fd8bd8fb2b53
 # 试版横幅那次证伪把真板标题写成「· blue 试版」之后，再拼多少次都改不回来——
 # 因为替换的锚点 `<title>UAE 求职看板</title>` 已经不存在了。**污染会自我复制。**
 # 这跟 R20-4「皮肤参数要有唯一事实源」是同一条：产物的身份不能靠继承。
-TITLE = 'UAE 求职看板'
+TITLE = _title      # 从用户 config 归一（display_name / name），不写死地区
 import re as _re_t
 out = _re_t.sub(r'<title>[^<]*</title>', '<title>%s</title>' % TITLE, out, count=1)
 assert '<title>%s</title>' % TITLE in out
 if OUT != SRC:
     out = out.replace('<title>求职看板</title>',
-                      '<title>UAE 求职看板 · %s 试版</title>' % SKIN, 1)
+                      '<title>%s · %s 试版</title>' % (TITLE, SKIN), 1)
     # 2026-08-20：光改 <title> 不够。Bella 打开 acid 试版（8-19 之后就没动过）
     # 问「今日怎么没更新呢」——**页面正文跟真板一模一样**，标签页那行小字看不见，
     # 而 Artifact 列表里三份都叫「UAE 求职看板…」，两个试版还排在真板前面。

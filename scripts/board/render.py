@@ -23,6 +23,16 @@ if os.path.isdir(_ASSETS):
     import shutil
     for _f in os.listdir(_ASSETS):
         shutil.copyfile(os.path.join(_ASSETS, _f), os.path.join(PARTS, _f))
+    # 品牌行 / 标题是**身份字段**，每次从用户配置归一，不从上一版产物继承。
+    # 2026-08-29 实锤：模板件是从原版看板原样拷的，侧栏写着「UAE 求职作战板 8-28」、
+    # 标题写着「UAE 求职看板」——一个找美国 QA 岗的人打开看到的是别人的地区和日期。
+    _cfg0 = json.load(io.open(os.path.join(WS, "config.json"), encoding="utf-8"))
+    _b0 = json.load(io.open(os.path.join(WS, "board.json"), encoding="utf-8"))
+    _brand = "%s · 求职作战板" % (_cfg0.get("display_name") or _cfg0.get("name") or "")
+    _d = (_b0.get("today") or "")[5:].replace("-0", "-").replace("-", "-")
+    _nav_path = os.path.join(PARTS, "nav.html")
+    _n = io.open(_nav_path, encoding="utf-8").read().replace("{{BRAND}}", _brand).replace("{{DATE}}", _d)
+    io.open(_nav_path, "w", encoding="utf-8").write(_n)
 
 _B = json.load(io.open(os.path.join(WS, "board.json"), encoding="utf-8"))
 _CFG = json.load(io.open(os.path.join(WS, "config.json"), encoding="utf-8"))
@@ -858,14 +868,7 @@ hd.write('    </details>\n')
 hd.write('  </div>\n')
 open(os.path.join(PARTS, 'part1-head.html'), 'w').write(hd.getvalue())
 
-# 侧边栏品牌行的日期：8-18 那天它还印着 8-16（手写的，谁也没记得改）。
-# 相对/手写的日期一律改成从 TODAY 注入（R33-4）。
-_nav_p = os.path.join(PARTS, 'nav.html')
-_nav = io.open(_nav_p, encoding='utf-8').read()
-_nav2 = re.sub(r'(<a class="side-brand"[^>]*>UAE 求职作战板<span>)[^<]*(</span>)',
-               r'\g<1>%d-%d\g<2>' % (TODAY.month, TODAY.day), _nav)
-assert _nav2 != _nav or ('<span>%d-%d</span>' % (TODAY.month, TODAY.day)) in _nav, 'nav.html 的品牌行结构变了，日期没注入进去'
-io.open(_nav_p, 'w', encoding='utf-8').write(_nav2)
+# 侧边栏品牌行 / 日期已在文件头铺模板件时注入（从 config.json 归一，不写死地区）。
 
 if _ACT_DEBT:
     print("⚠ 短动作句欠账（收起态只显示动作前缀）:", _ACT_DEBT)
