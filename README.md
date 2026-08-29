@@ -36,6 +36,26 @@ python3 start.py
 
 这些都修了，但同类问题一定还会有。所以 `confirmed` 不是 `true` 时打分脚本直接退出——**宁可不出分，也不拿猜的基准去判你的岗位。**
 
+## 模型 key：要不要、花谁的钱、发出去什么
+
+**分数、排序、逐条判据不用模型**——全是确定性 Python，不接任何 key 也能跑出看板。
+
+**只有一处用模型**：给每个岗写「公司发展四问 + 行动建议 + 触达路径 + 你的弹药/缺口」。
+接入时会问你要 key，你要知道三件事：
+
+- **花的是你自己的额度**：每个岗调一次，30 个岗就是 30 次调用
+- **发给模型商的是**：该岗的 JD 全文 + 你的事实清单（年限、能力项）。**不发简历原文、不发邮箱内容**
+- **不给 key 会怎样**：看板照出，分数照算，只是决策台上没有点评那几行——**不会编**
+
+支持 Anthropic 格式和 OpenAI 兼容格式（OpenAI / DeepSeek / OpenRouter / 自建都行），用哪家你自己定：
+
+```bash
+export JMB_MODEL_KEY=...
+export JMB_MODEL_PROVIDER=openai            # 或 anthropic
+export JMB_MODEL_BASE=https://api.deepseek.com/v1
+export JMB_MODEL=deepseek-v4-flash
+```
+
 ## 分数怎么算（全是确定性代码，零模型调用）
 
 - **适配度 = 这份 JD 的硬性要求里你命中几条 ÷ 一共几条**。分母只能来自 JD 正文逐条抽取，不许手填。

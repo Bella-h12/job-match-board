@@ -89,7 +89,12 @@ def main():
     # ---------- 4 模型 key ----------
     env = dict(os.environ)
     if not env.get("JMB_MODEL_KEY"):
-        print("\n--- 你自己的模型（只用来写每岗点评；不给就跳过，看板照出但决策台为空）---")
+        print("\n--- 你自己的模型 key ---")
+        print("这一步做什么：给每个岗写「公司发展四问 / 行动建议 / 触达路径 / 你的弹药与缺口」。")
+        print("会发生什么：每个岗调一次你的模型，**花的是你自己的额度**；发给模型商的内容是")
+        print("  该岗的 JD 全文 + 你的事实清单（年限、能力项），不含简历原文、不含邮箱。")
+        print("不给会怎样：分数和排序照样算（那部分零模型调用），只是决策台上没有点评那几行。")
+        print("支持：Anthropic 格式 / OpenAI 兼容格式（OpenAI、DeepSeek、OpenRouter、自建都行）。")
         k = getpass.getpass("模型 key（回车跳过）: ").strip()
         if k:
             env["JMB_MODEL_KEY"] = k
