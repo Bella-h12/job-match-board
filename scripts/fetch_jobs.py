@@ -111,7 +111,23 @@ def main():
                 got += 1
         except Exception:
             pass
-    print("抓到 JD 正文 %d / %d 份 → %s" % (got, len(ids), cache))
+    # ⚠ 第一段搜索返回的「直接 ID」是结果页里 Selected 的那条——它同样可能是 LinkedIn 塞的
+    # 推荐位（2026-08-29 实测：14 个 AI Engineer 岗从这条路进了一个测试工程师的看板）。
+    # 抓完 JD 再按标题过一遍同一道筛，对不上方向的整条剔除。
+    kept, dropped = [], []
+    for it in json.load(io.open(jd_out, encoding="utf-8")):
+        try:
+            head = [l.strip() for l in json.loads(it["result"])["sections"]["job_posting"].split("\n") if l.strip()]
+            title = head[1] if len(head) > 1 else ""
+        except Exception:
+            kept.append(it); continue
+        (kept if role_hit(title) else dropped).append(it)
+    json.dump(kept, io.open(jd_out, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    if dropped:
+        print("标题跟方向对不上、剔除 %d 个（例：%s）" % (len(dropped),
+              " / ".join(json.loads(x["result"])["sections"]["job_posting"].split("\n")[2][:30] for x in dropped[:3])))
+    got = sum(1 for it in kept if len(str(it.get("result", ""))) > 800)
+    print("抓到 JD 正文 %d / %d 份 → %s" % (got, len(kept), cache))
     if got == 0:
         raise SystemExit("一份 JD 都没抓到 —— 判失败，不要继续往下算分")
 
