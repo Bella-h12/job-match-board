@@ -864,7 +864,8 @@ hd.write('      <p><b>公司发展 ＝ 两问各 50 分</b>，全部从 JD 文�
          '①<b>碰的是 AI 产品本身</b>吗（JD 里 AI / LLM / agent 这类词的密度，不是「一家用 AI 的公司」）'
          '②<b>雇主是甲方</b>吗（JD 有没有 our client / staffing / recruitment agency 这类代招字眼）。'
          '「在不在长」「三年后值不值钱」JD 里没有、代码判不了，<b>所以不进分数</b>——不拿模型猜一个数顶上。'
-         '<b>两项缺任何一项，这个岗就没有优先级。</b></p>\n')hd.write('    </details>\n')
+         '<b>两项缺任何一项，这个岗就没有优先级。</b></p>\n')
+hd.write('    </details>\n')
 hd.write('  </div>\n')
 open(os.path.join(PARTS, 'part1-head.html'), 'w').write(hd.getvalue())
 
